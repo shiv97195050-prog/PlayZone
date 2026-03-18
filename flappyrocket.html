@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flappy Rocket</title>
+    <style>
+        body { margin:0; padding:0; overflow:hidden; background:#000; font-family:'Nunito', sans-serif; }
+        canvas { display:block; width:100vw; height:100vh; }
+        #ui { position:absolute; top:20px; left:0; width:100%; text-align:center; pointer-events:none; z-index:10; }
+        #score { font-size:4rem; font-weight:bold; color:#fff; text-shadow:0 0 20px #06b6d4, 0 5px 0 #0891b2; font-family:'Fredoka', sans-serif;}
+        
+        #game-over { position:absolute; inset:0; background:rgba(0,0,0,0.8); display:flex; flex-direction:column; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:0.3s; z-index:20; }
+        #game-over.show { opacity:1; pointer-events:all; }
+        .go-box { background:#1e293b; padding:40px; border-radius:30px; border:4px solid #7c3aed; box-shadow:0 0 40px rgba(124,58,237,0.5); text-align:center; transform:translateY(20px); transition:0.4s cubic-bezier(0.175,0.885,0.32,1.275); }
+        #game-over.show .go-box { transform:translateY(0); }
+        h1 { color:#F59E0B; margin:0 0 20px 0; font-size:3rem; text-transform:uppercase; text-shadow:0 5px 0 #b45309; }
+        .score-info { color:#94a3b8; font-size:1.5rem; margin-bottom:10px; }
+        .val { color:#fff; font-size:2.5rem; font-weight:bold; }
+        
+        button { margin-top:30px; background:linear-gradient(to bottom, #06b6d4, #0891b2); color:white; border:none; padding:15px 40px; border-radius:50px; font-size:1.5rem; font-weight:bold; cursor:pointer; box-shadow:0 10px 0 #164e63, 0 15px 20px rgba(0,0,0,0.5); transition:all 0.1s; text-transform:uppercase; font-family:inherit;}
+        button:active { transform:translateY(10px); box-shadow:0 0 0 #164e63; }
+        
+        #start-msg { position:absolute; top:60%; width:100%; text-align:center; color:#fff; font-size:1.5rem; pointer-events:none; animation:pulse 1.5s infinite; text-shadow:2px 2px 5px #000; }
+        @keyframes pulse { 0%,100% {opacity:1;} 50% {opacity:0.3;} }
+    </style>
+</head>
+<body>
+    <div id="ui"><div id="score">0</div></div>
+    
+    <div id="start-msg">Tap or Space to Thrust</div>
+
+    <div id="game-over">
+        <div class="go-box">
+            <h1>CRASHED</h1>
+            <div class="score-info">SCORE<br><span class="val" id="final-score">0</span></div>
+            <div class="score-info">BEST<br><span class="val" id="best-score">0</span></div>
+            <button onclick="init()">Play Again</button>
+        </div>
+    </div>
+    
+    <canvas id="gameCanvas"></canvas>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        let w = canvas.width = window.innerWidth;
+        let h = canvas.height = window.innerHeight;
+        
+        // Stars
+        let stars = [[],[],[]]; // 3 parallax layers
+        function initStars() {
+            stars = [[],[],[]];
+            for(let i=0; i<3; i++) {
+                for(let j=0; j<50; j++) stars[i].push({x:Math.random()*w, y:Math.random()*h, r:Math.random()*1.5+0.5});
+            }
+        }
+        initStars();
+
+        window.addEventListener('resize', () => { w = canvas.width = window.innerWidth; h = canvas.height = window.innerHeight; initStars(); });
+
+        let rocket, pipes, particles;
+        let score = 0, bestScore = localStorage.getItem('flappyBest') || 0;
+        let frames = 0, pipeSpawnRate = 120;
+        let gameState = 0; // 0=ready, 1=playing, 2=gameover
+
+        const GRAVITY = 0.4;
+        const THRUST = -8;
+
+        class Rocket {
+            constructor() {
+                this.x = w*0.3; this.y = h/2;
+                this.w = 50; this.h = 30;
+                this.vel = 0;
+                this.angle = 0;
+                this.radius = 20; // collision
+            }
+            update() {
+                if(gameState !== 1) return;
+                this.vel += GRAVITY;
+                this.y += this.vel;
+                
+                // Angle based on velocity
+                this.angle = Math.min(Math.PI/4, Math.max(-Math.PI/4, (this.vel * 0.1)));
+                
+                // Floor limit
+                if(this.y >= h - this.radius) {
+                    this.y = h - this.radius;
+                    die();
+                }
+                // Ceiling
+                if(this.y <= this.radius) {
+                    this.y = this.radius;
+                    this.vel = 0;
+                }
+            }
+            thrust() {
+                this.vel = THRUST;
+                // Exhaust particles
+                for(let i=0; i<5; i++) particles.push(new Particle(this.x - 20, this.y, '#F97316', Math.PI + (Math.random()-0.5)*0.5, Math.random()*5+2));
+            }
+            draw() {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.angle);
+                
+                // Flame
+                if(this.vel < 0) {
+                    ctx.fillStyle = '#ef4444';
+                    ctx.beginPath();
+                    ctx.moveTo(-20, -10); ctx.lineTo(-40, 0); ctx.lineTo(-20, 10);
+                    ctx.fill();
+                    ctx.fillStyle = '#facc15';
+                    ctx.beginPath();
+                    ctx.moveTo(-20, -5); ctx.lineTo(-30, 0); ctx.lineTo(-20, 5);
+                    ctx.fill();
+                }
+
+                // Body
+                ctx.fillStyle = '#e2e8f0';
+                ctx.beginPath();
+                ctx.moveTo(25, 0); // nose
+                ctx.lineTo(10, 15);
+                ctx.lineTo(-20, 15);
+                ctx.lineTo(-20, -15);
+                ctx.lineTo(10, -15);
+                ctx.closePath();
+                ctx.fill();
+                
+                // Fins
+                ctx.fillStyle = '#ef4444';
+                ctx.beginPath(); ctx.moveTo(-10, 15); ctx.lineTo(-25, 25); ctx.lineTo(-20, 15); ctx.fill();
+                ctx.beginPath(); ctx.moveTo(-10, -15); ctx.lineTo(-25, -25); ctx.lineTo(-20, -15); ctx.fill();
+                
+                // Window
+                ctx.fillStyle = '#06b6d4';
+                ctx.beginPath(); ctx.arc(5, 0, 7, 0, Math.PI*2); ctx.fill();
+                ctx.strokeStyle = '#fff'; ctx.lineWidth=2; ctx.stroke();
+                
+                ctx.restore();
+            }
+        }
+
+        class Pipe {
+            constructor() {
+                this.x = w;
+                this.w = 60;
+                // Gap size decreases slowly, min 150
+                let difficulty = Math.min(score, 50); // caps at 50
+                this.gap = 250 - (difficulty * 2);
+                
+                let minTop = 50;
+                let maxTop = h - this.gap - 50;
+                this.topH = Math.random() * (maxTop - minTop) + minTop;
+                
+                this.bottomY = this.topH + this.gap;
+                this.bottomH = h - this.bottomY;
+                
+                this.speed = 4 + (difficulty * 0.05); // slightly faster
+                this.passed = false;
+            }
+            update() {
+                this.x -= this.speed;
+                // Collision
+                if(rocket.x + rocket.radius > this.x && rocket.x - rocket.radius < this.x + this.w) {
+                    // Top pipe or Bottom pipe
+                    if(rocket.y - rocket.radius < this.topH || rocket.y + rocket.radius > this.bottomY) {
+                        die();
+                    }
+                }
+                
+                // Score
+                if(this.x + this.w < rocket.x && !this.passed) {
+                    this.passed = true;
+                    score++;
+                    document.getElementById('score').innerText = score;
+                    // pulse score
+                    let s = document.getElementById('score');
+                    s.style.transform = 'scale(1.5)';
+                    setTimeout(()=>s.style.transform='scale(1)', 100);
+                }
+            }
+            draw() {
+                const drawPillar = (y, height, isTop) => {
+                    ctx.fillStyle = '#475569';
+                    ctx.fillRect(this.x, y, this.w, height);
+                    
+                    // Detail lines
+                    ctx.fillStyle = '#94a3b8';
+                    ctx.fillRect(this.x+5, y, 5, height);
+                    ctx.fillRect(this.x+this.w-10, y, 4, height);
+                    
+                    // Cap (Asteroid rocky end)
+                    ctx.fillStyle = '#64748b';
+                    let capY = isTop ? y + height - 20 : y;
+                    ctx.beginPath(); ctx.roundRect(this.x-5, capY, this.w+10, 20, 5); ctx.fill();
+                    
+                    // Crater details
+                    ctx.fillStyle = '#334155';
+                    ctx.beginPath(); ctx.arc(this.x + 15, capY + 10, 5, 0, Math.PI*2); ctx.fill();
+                    ctx.beginPath(); ctx.arc(this.x + 45, capY + 5, 3, 0, Math.PI*2); ctx.fill();
+                };
+                
+                drawPillar(0, this.topH, true);
+                drawPillar(this.bottomY, this.bottomH, false);
+            }
+        }
+
+        class Particle {
+            constructor(x,y,color,angle,speed) {
+                this.x = x; this.y = y; this.color = color;
+                this.vx = Math.cos(angle)*speed; this.vy = Math.sin(angle)*speed;
+                this.life = 1; this.decay = Math.random()*0.02 + 0.02;
+            }
+            update() { this.x+=this.vx; this.y+=this.vy; this.life-=this.decay; }
+            draw() {
+                if(this.life<=0) return;
+                ctx.globalAlpha = this.life; ctx.fillStyle=this.color;
+                ctx.beginPath(); ctx.arc(this.x, this.y, 4, 0, Math.PI*2); ctx.fill();
+                ctx.globalAlpha = 1;
+            }
+        }
+
+        function init() {
+            rocket = new Rocket();
+            pipes = []; particles = [];
+            score = 0; frames = 0;
+            document.getElementById('score').innerText = score;
+            gameState = 0;
+            document.getElementById('start-msg').style.display = 'block';
+            document.getElementById('game-over').classList.remove('show');
+        }
+
+        function die() {
+            if(gameState === 2) return;
+            gameState = 2;
+            document.getElementById('start-msg').style.display = 'none';
+            
+            // Explosion
+            for(let i=0; i<40; i++) particles.push(new Particle(rocket.x, rocket.y, ['#ef4444','#f97316','#facc15'][Math.floor(Math.random()*3)], Math.random()*Math.PI*2, Math.random()*8+2));
+            
+            // UI
+            if(score > bestScore) {
+                bestScore = score;
+                localStorage.setItem('flappyBest', bestScore);
+            }
+            document.getElementById('final-score').innerText = score;
+            document.getElementById('best-score').innerText = bestScore;
+            
+            setTimeout(()=>document.getElementById('game-over').classList.add('show'), 500);
+        }
+
+        function input() {
+            if(gameState === 0) {
+                gameState = 1;
+                document.getElementById('start-msg').style.display = 'none';
+                rocket.thrust();
+            } else if (gameState === 1) {
+                rocket.thrust();
+            }
+        }
+
+        // Use standard loop mechanism but handle fixed step manually internally if needed.
+        function loop() {
+            requestAnimationFrame(loop);
+            
+            // Background gradient
+            let grad = ctx.createLinearGradient(0,0,0,h);
+            grad.addColorStop(0, '#020617'); grad.addColorStop(1, '#0f172a');
+            ctx.fillStyle = grad; ctx.fillRect(0,0,w,h);
+            
+            // Parallax Stars
+            ctx.fillStyle = '#fff';
+            stars.forEach((layer, index) => {
+                let speed = (index+1) * 0.5 * (gameState===1?1:0.2); // Slow down if not playing
+                layer.forEach(s => {
+                    s.x -= speed;
+                    if(s.x < 0) s.x = w;
+                    ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, Math.PI*2); ctx.fill();
+                });
+            });
+
+            if(gameState !== 2) {
+                rocket.update();
+                rocket.draw();
+            }
+
+            if(gameState === 1) {
+                frames++;
+                // Spawn pipes based on diff
+                let diff = Math.min(score, 50);
+                if(frames % Math.max(70, pipeSpawnRate - diff) === 0) {
+                    pipes.push(new Pipe());
+                }
+                
+                for(let i=pipes.length-1; i>=0; i--) {
+                    pipes[i].update();
+                    pipes[i].draw();
+                    if(pipes[i].x + pipes[i].w < 0) pipes.splice(i,1);
+                }
+            } else {
+                // static render pipes if dead or ready
+                pipes.forEach(p => p.draw());
+            }
+
+            // Particles
+            for(let i=particles.length-1; i>=0; i--) {
+                particles[i].update(); particles[i].draw();
+                if(particles[i].life<=0) particles.splice(i,1);
+            }
+        }
+
+        window.addEventListener('keydown', e => { if(e.code==='Space') { e.preventDefault(); input(); }});
+        window.addEventListener('mousedown', input);
+        canvas.addEventListener('touchstart', (e)=> { e.preventDefault(); input(); }, {passive:false});
+
+        init();
+        requestAnimationFrame(loop);
+
+    </script>
+</body>
+</html>

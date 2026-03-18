@@ -1,0 +1,1438 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PlayZone 🎮 | Free Online Games</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&family=Nunito:wght@400;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0D0D0D;
+            --card-bg: #1A1A1A;
+            --accent-purple: #7C3AED;
+            --accent-cyan: #06B6D4;
+            --text-main: #FFFFFF;
+            --text-secondary: #B3B3B3;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --neon-glow-purple: 0 0 15px rgba(124, 58, 237, 0.5);
+            --neon-glow-cyan: 0 0 15px rgba(6, 182, 212, 0.5);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: 'Nunito', sans-serif;
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        h1,
+        h2,
+        h3,
+        .logo {
+            font-family: 'Fredoka', sans-serif;
+        }
+
+        /* --- Navigation --- */
+        nav {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: rgba(13, 13, 13, 0.9);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 1rem 5%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--accent-cyan);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-shadow: var(--neon-glow-cyan);
+        }
+
+        .search-container {
+            flex: 0 1 400px;
+            position: relative;
+        }
+
+        .search-container input {
+            width: 100%;
+            background: var(--card-bg);
+            border: 2px solid transparent;
+            border-radius: 50px;
+            padding: 0.8rem 1.5rem;
+            color: white;
+            font-family: inherit;
+            transition: var(--transition);
+        }
+
+        .search-container input:focus {
+            outline: none;
+            border-color: var(--accent-purple);
+            box-shadow: var(--neon-glow-purple);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        .nav-links a:hover {
+            color: var(--accent-cyan);
+        }
+
+        /* --- Hero Section --- */
+        .hero {
+            padding: 6rem 5% 4rem;
+            text-align: center;
+            background: linear-gradient(rgba(13, 13, 13, 0.7), rgba(13, 13, 13, 0.9)), url('assets/hero-bg.png');
+            background-size: cover;
+            background-position: center;
+            position: relative;
+            overflow: hidden;
+            border-bottom: 2px solid var(--accent-purple);
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero h1 {
+            font-size: 4.5rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(90deg, var(--accent-cyan), var(--accent-purple), var(--accent-cyan));
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: fadeInDown 0.8s ease-out, shine 3s linear infinite;
+        }
+
+        .hero h3 {
+            font-size: 1.5rem;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+        }
+
+        @keyframes shine {
+            to {
+                background-position: 200% center;
+            }
+        }
+
+        /* Animated Controller Graphic - Premium CSS */
+        .controller-graphic {
+            width: 150px;
+            height: 100px;
+            margin: 2rem auto;
+            position: relative;
+            animation: float 4s ease-in-out infinite;
+            filter: drop-shadow(0 0 20px var(--accent-purple));
+        }
+
+        .controller-body {
+            width: 100%;
+            height: 100%;
+            background: #111;
+            border-radius: 30px 30px 50px 50px;
+            border: 3px solid var(--accent-purple);
+            position: relative;
+        }
+
+        .controller-body::before,
+        .controller-body::after {
+            content: '';
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background: #111;
+            border: 3px solid var(--accent-purple);
+            border-radius: 50%;
+            bottom: -15px;
+        }
+
+        .controller-body::before {
+            left: -10px;
+        }
+
+        .controller-body::after {
+            right: -10px;
+        }
+
+        .joystick {
+            position: absolute;
+            width: 25px;
+            height: 25px;
+            background: var(--accent-cyan);
+            border-radius: 50%;
+            top: 30px;
+            box-shadow: var(--neon-glow-cyan);
+        }
+
+        .left-js {
+            left: 30px;
+        }
+
+        .right-js {
+            right: 30px;
+        }
+
+        .buttons {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: var(--accent-purple);
+            border-radius: 50%;
+            top: 25px;
+            right: 25px;
+            box-shadow: 0 15px 0 var(--accent-purple), -15px 7.5px 0 var(--accent-purple), 15px 7.5px 0 var(--accent-purple);
+        }
+
+        /* Hero Animation */
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0) rotate(0);
+            }
+
+            50% {
+                transform: translateY(-30px) rotate(10deg);
+            }
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* --- Genre Filters --- */
+        .genres-wrapper {
+            padding: 2rem 5%;
+            display: flex;
+            gap: 1rem;
+            overflow-x: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            justify-content: center;
+        }
+
+        .genres-wrapper::-webkit-scrollbar {
+            display: none;
+        }
+
+        .genre-pill {
+            padding: 0.6rem 1.5rem;
+            background: var(--card-bg);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50px;
+            color: var(--text-secondary);
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            white-space: nowrap;
+        }
+
+        .genre-pill:hover,
+        .genre-pill.active {
+            background: var(--accent-purple);
+            border-color: var(--accent-purple);
+            color: white;
+            box-shadow: var(--neon-glow-purple);
+            transform: scale(1.05);
+        }
+
+        /* --- Section Header --- */
+        .section-header {
+            padding: 2rem 5% 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .section-header h2 {
+            font-size: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* --- Game Grid --- */
+        .game-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1.5rem;
+            padding: 1rem 5% 3rem;
+        }
+
+        .horizontal-scroll {
+            display: flex;
+            gap: 1.5rem;
+            overflow-x: auto;
+            padding: 1rem 5% 2rem;
+            scrollbar-width: thin;
+            scrollbar-color: var(--accent-purple) transparent;
+        }
+
+        /* --- Game Card --- */
+        .game-card {
+            background: var(--card-bg);
+            border-radius: 15px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            min-width: 200px;
+        }
+
+        .game-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--accent-cyan);
+            box-shadow: var(--neon-glow-cyan);
+        }
+
+        .thumbnail-container {
+            width: 100%;
+            aspect-ratio: 1/1;
+            background: #222;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .thumbnail-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: var(--transition);
+        }
+
+        .game-card:hover img {
+            transform: scale(1.1);
+            filter: brightness(0.4);
+        }
+
+        .play-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.5);
+            opacity: 0;
+            transition: var(--transition);
+            background: var(--accent-cyan);
+            color: white;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            box-shadow: 0 0 20px var(--accent-cyan);
+        }
+
+        .game-card:hover .play-overlay {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .game-info {
+            padding: 1rem;
+        }
+
+        .game-title {
+            font-weight: 700;
+            margin-bottom: 0.3rem;
+            font-size: 1.1rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .game-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8rem;
+        }
+
+        .category-badge {
+            padding: 0.2rem 0.6rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            color: var(--text-secondary);
+        }
+
+        .play-count {
+            color: var(--text-secondary);
+        }
+
+        /* --- Crowns for Trending --- */
+        .crown {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 1.2rem;
+            z-index: 5;
+            filter: drop-shadow(0 0 5px rgba(0, 0, 0, 0.5));
+        }
+
+        /* --- View Container --- */
+        #main-view,
+        #game-view {
+            transition: opacity 0.5s ease;
+        }
+
+        #game-view {
+            display: none;
+            padding: 2rem 5%;
+            min-height: calc(100vh - 80px);
+        }
+
+        .game-player-container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--accent-cyan);
+            text-decoration: none;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .back-btn:hover {
+            color: var(--accent-purple);
+            transform: translateX(-5px);
+        }
+
+        .iframe-wrapper {
+            position: relative;
+            width: 100%;
+            height: clamp(300px, 70vh, 600px);
+            background: #000;
+            border-radius: 20px;
+            overflow: hidden;
+            border: 4px solid var(--accent-purple);
+            box-shadow: var(--neon-glow-purple);
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .coming-soon-msg {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: var(--text-secondary);
+            text-align: center;
+            gap: 1rem;
+        }
+
+        .game-details {
+            margin-top: 2rem;
+        }
+
+        .game-details h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        /* --- Footer --- */
+        footer {
+            background: #050505;
+            padding: 4rem 5%;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            text-align: center;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .footer-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .footer-links a:hover {
+            color: white;
+        }
+
+        /* --- Responsive --- */
+        @media (max-width: 768px) {
+            nav {
+                padding: 1rem;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .hero h1 {
+                font-size: 2.2rem;
+            }
+
+            .game-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1rem;
+            }
+
+            .horizontal-scroll {
+                padding: 1rem;
+            }
+
+            .iframe-wrapper {
+                height: 50vh; /* Shorter on mobile for better visibility */
+            }
+        }
+
+        /* --- Staggered Animation --- */
+        .game-card {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .game-card.animate {
+            animation: cardFadeIn 0.5s forwards;
+        }
+
+        @keyframes cardFadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ===== ACTION GAMES — PREMIUM REDESIGN ===== */
+        #action-view {
+            display: none;
+            transition: opacity 0.5s ease;
+        }
+
+        /* Action Hero */
+        .action-hero {
+            padding: 5rem 5% 3rem; text-align: center;
+            background: linear-gradient(135deg, rgba(13,13,13,0.85) 0%, rgba(30,5,5,0.95) 100%), url('assets/hero-bg.png');
+            background-size: cover; background-position: center;
+            border-bottom: 2px solid #DC2626;
+            position: relative; overflow: hidden;
+        }
+        .action-hero::before {
+            content: ''; position: absolute; inset: 0;
+            background-image: repeating-linear-gradient(0deg, transparent, transparent 40px, rgba(220,38,38,0.04) 40px, rgba(220,38,38,0.04) 41px),
+                              repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(220,38,38,0.04) 40px, rgba(220,38,38,0.04) 41px);
+            animation: gridMove 8s linear infinite;
+        }
+        @keyframes gridMove { 0%{background-position:0 0;} 100%{background-position:40px 40px;} }
+        .action-hero-content { position: relative; z-index: 2; }
+        .action-hero h1 {
+            font-size: clamp(2.5rem,6vw,5rem);
+            background: linear-gradient(180deg,#FF6B35 0%,#DC2626 60%,#991B1B 100%);
+            -webkit-background-clip: text; background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: flicker 3s ease-in-out infinite alternate;
+            line-height: 1.1; margin-bottom: 0.5rem;
+        }
+        .action-hero h3 { color: #B3B3B3; font-size: 1.2rem; margin-bottom: 1.5rem; }
+        @keyframes flicker {
+            0%   { filter: drop-shadow(0 0 8px rgba(220,38,38,0.4)); }
+            50%  { filter: drop-shadow(0 0 25px rgba(249,115,22,0.9)); }
+            100% { filter: drop-shadow(0 0 6px rgba(220,38,38,0.2)); }
+        }
+        .hero-stat-pills { display:flex; gap:1rem; justify-content:center; flex-wrap:wrap; }
+        .hero-stat-pill {
+            padding: 0.5rem 1.2rem; border-radius: 50px;
+            font-weight: 700; font-size: 0.9rem;
+            border: 1px solid rgba(255,255,255,0.15);
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(8px); color: white;
+        }
+
+        /* Sticky Filter Bar */
+        .action-filter-bar {
+            position: sticky; top: 64px; z-index: 500;
+            background: rgba(13,13,13,0.95);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255,255,255,0.07);
+            padding: 0.8rem 5%;
+            display: flex; gap: 0.8rem; flex-wrap: wrap; align-items: center;
+        }
+        .filter-pill {
+            padding: 0.4rem 1rem; border-radius: 50px;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: #B3B3B3; cursor: pointer;
+            font-weight: 600; font-size: 0.85rem;
+            transition: all 0.2s ease; white-space: nowrap;
+        }
+        .filter-pill:hover { color:white; border-color:rgba(255,255,255,0.3); }
+        .filter-pill.active { background:#DC2626; border-color:#DC2626; color:white; box-shadow:0 0 12px rgba(220,38,38,0.5); }
+        .filter-search {
+            margin-left: auto;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 50px; padding: 0.4rem 1rem;
+            color: white; font-family: inherit; font-size: 0.85rem;
+            width: 180px; transition: all 0.2s;
+        }
+        .filter-search:focus { outline:none; border-color:#DC2626; width:220px; }
+        .filter-sort {
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 8px; padding: 0.4rem 0.8rem;
+            color: white; font-family: inherit; cursor: pointer; font-size: 0.85rem;
+        }
+        .filter-sort option { background: #1A1A1A; }
+        .clear-filters-link { color:#DC2626; font-size:0.8rem; cursor:pointer; text-decoration:underline; display:none; }
+        .clear-filters-link.visible { display:inline; }
+
+        /* Fav/Recent Tabs */
+        .fav-tab-bar { display:flex; gap:1rem; padding:0.8rem 5% 0; border-bottom:1px solid rgba(255,255,255,0.05); }
+        .fav-tab { padding:0.5rem 1rem; cursor:pointer; color:#B3B3B3; font-weight:700; border-bottom:3px solid transparent; transition:all 0.2s; }
+        .fav-tab.active { color:white; border-color:#DC2626; }
+
+        /* Featured Row */
+        .featured-section { padding:1.5rem 5% 0; }
+        .featured-section h2 { font-size:1.4rem; margin-bottom:1rem; color:white; }
+        .featured-row { display:flex; gap:1.2rem; overflow-x:auto; padding-bottom:1rem; scrollbar-width:thin; scrollbar-color:#DC2626 transparent; }
+        .featured-card {
+            flex: 0 0 260px; border-radius:16px; overflow:hidden;
+            cursor:pointer; position:relative;
+            border:1px solid rgba(255,255,255,0.08);
+            transition:transform 0.25s cubic-bezier(0.34,1.56,0.64,1);
+        }
+        .featured-card:hover { transform:translateY(-6px); }
+        .featured-thumb {
+            width:100%; height:160px;
+            display:flex; align-items:center; justify-content:center;
+            font-size:72px; position:relative; overflow:hidden;
+        }
+        .featured-thumb .grid-overlay {
+            position:absolute; inset:0;
+            background-image: repeating-linear-gradient(0deg,rgba(0,0,0,0.1) 0,rgba(0,0,0,0.1) 1px,transparent 1px,transparent 20px),
+                              repeating-linear-gradient(90deg,rgba(0,0,0,0.1) 0,rgba(0,0,0,0.1) 1px,transparent 1px,transparent 20px);
+        }
+        .editors-banner {
+            position:absolute; top:14px; right:-22px;
+            background:linear-gradient(90deg,#D97706,#F59E0B);
+            color:#1A1A1A; font-weight:800; font-size:0.7rem;
+            padding:0.25rem 2.2rem; transform:rotate(35deg);
+            box-shadow:0 2px 8px rgba(0,0,0,0.4);
+        }
+        .featured-info { padding:0.8rem 1rem; background:rgba(0,0,0,0.6); backdrop-filter:blur(8px); }
+        .featured-title { font-weight:700; font-size:1rem; color:white; }
+        .featured-genre { font-size:0.75rem; color:#B3B3B3; }
+
+        /* Recently Played */
+        .recent-section { padding:1rem 5% 0; }
+        .recent-section h3 { font-size:1.1rem; color:#B3B3B3; margin-bottom:0.8rem; }
+        .recent-row { display:flex; gap:0.8rem; overflow-x:auto; padding-bottom:0.5rem; scrollbar-width:none; }
+        .recent-row::-webkit-scrollbar { display:none; }
+        .recent-chip {
+            flex:0 0 auto; display:flex; align-items:center; gap:0.5rem;
+            background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1);
+            border-radius:50px; padding:0.35rem 0.9rem;
+            cursor:pointer; font-size:0.85rem; color:white; transition:all 0.2s;
+        }
+        .recent-chip:hover { background:rgba(220,38,38,0.2); border-color:#DC2626; }
+
+        /* Game Grid */
+        .action-grid-section { padding:1.5rem 5% 4rem; }
+        .action-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill,minmax(200px,1fr));
+            gap: 20px;
+        }
+        .empty-state { grid-column:1/-1; text-align:center; padding:4rem; color:#B3B3B3; font-size:1.3rem; }
+
+        /* Premium Game Cards */
+        .action-card {
+            border-radius:16px; overflow:hidden; cursor:pointer;
+            position:relative; border:1px solid rgba(255,255,255,0.07);
+            background:#1A1A1A;
+            transition:transform 0.2s ease, box-shadow 0.2s ease;
+            opacity:0; transform:translateY(20px);
+        }
+        .action-card.loaded { opacity:1; transform:translateY(0); transition:opacity 0.4s ease, transform 0.4s ease, box-shadow 0.2s ease; }
+        .action-card:hover { transform:translateY(-8px); box-shadow:0 0 22px var(--card-glow,rgba(220,38,38,0.4)); }
+
+        .action-thumb {
+            width:100%; aspect-ratio:1/1;
+            display:flex; align-items:center; justify-content:center;
+            position:relative; overflow:hidden;
+        }
+        .thumb-emoji { font-size:72px; position:relative; z-index:2; transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1); }
+        .action-card:hover .thumb-emoji { transform:scale(1.2); }
+        .thumb-grid {
+            position:absolute; inset:0;
+            background-image: repeating-linear-gradient(0deg,rgba(255,255,255,0.03) 0,rgba(255,255,255,0.03) 1px,transparent 1px,transparent 18px),
+                              repeating-linear-gradient(90deg,rgba(255,255,255,0.03) 0,rgba(255,255,255,0.03) 1px,transparent 1px,transparent 18px);
+        }
+        .thumb-overlay {
+            position:absolute; inset:0; z-index:3;
+            background:rgba(0,0,0,0.5);
+            display:flex; align-items:flex-end; justify-content:center; padding-bottom:12px;
+            opacity:0; transition:opacity 0.2s ease;
+        }
+        .action-card:hover .thumb-overlay { opacity:1; }
+        .play-now-btn {
+            padding:0.5rem 1.4rem; border-radius:50px;
+            font-weight:800; font-size:0.85rem;
+            color:white; border:none; cursor:pointer;
+            background:linear-gradient(135deg,var(--card-theme,#DC2626),#991B1B);
+            box-shadow:0 4px 14px rgba(0,0,0,0.5);
+            transform:translateY(8px); transition:transform 0.2s;
+        }
+        .action-card:hover .play-now-btn { transform:translateY(0); }
+
+        .fav-btn {
+            position:absolute; top:8px; right:8px; z-index:10;
+            background:rgba(0,0,0,0.5); border:none; cursor:pointer;
+            font-size:1.1rem; padding:0.3rem; border-radius:50%; line-height:1;
+            opacity:0; transition:opacity 0.2s;
+        }
+        .action-card:hover .fav-btn, .fav-btn.active { opacity:1; }
+
+        /* Particle ring */
+        .particle-ring { position:absolute; inset:0; pointer-events:none; z-index:4; opacity:0; transition:opacity 0.3s; }
+        .action-card:hover .particle-ring { opacity:1; }
+        .particle {
+            position:absolute; width:6px; height:6px; border-radius:50%;
+            background:var(--card-theme,#DC2626); top:50%; left:50%;
+        }
+        .action-card:hover .particle { animation:orbit var(--speed,2s) linear infinite; }
+        .particle:nth-child(1){--angle:0deg;   --speed:1.8s;}
+        .particle:nth-child(2){--angle:90deg;  --speed:2.1s; animation-delay:-0.5s;}
+        .particle:nth-child(3){--angle:180deg; --speed:1.9s; animation-delay:-1s;}
+        .particle:nth-child(4){--angle:270deg; --speed:2.3s; animation-delay:-1.5s;}
+        @keyframes orbit {
+            0%   { transform:rotate(var(--angle)) translateX(44px); opacity:1; }
+            100% { transform:rotate(calc(var(--angle) + 360deg)) translateX(44px); opacity:1; }
+        }
+
+        /* Badges */
+        .card-badge { position:absolute; top:10px; left:10px; z-index:10; padding:0.25rem 0.6rem; border-radius:8px; font-size:0.75rem; font-weight:800; color:white; }
+        .badge-gold   { background:linear-gradient(135deg,#D97706,#F59E0B); color:#1A1A1A; box-shadow:0 0 10px rgba(245,158,11,0.6); }
+        .badge-hot    { background:#DC2626; animation:badgeFlicker 1.5s ease-in-out infinite alternate; }
+        .badge-new    { background:#16A34A; animation:badgePulse 1.5s ease-in-out infinite; }
+        .badge-funny  { background:#F97316; }
+        .badge-2p     { background:#2563EB; }
+        .badge-online { background:#0D9488; }
+        .badge-epic   { background:#7C3AED; }
+        @keyframes badgeFlicker { from{box-shadow:0 0 5px #DC2626;} to{box-shadow:0 0 18px #F97316;} }
+        @keyframes badgePulse { 0%,100%{box-shadow:0 0 0 0 rgba(22,163,74,0.5);} 50%{box-shadow:0 0 0 6px rgba(22,163,74,0);} }
+
+        .action-info { padding:0.8rem 1rem; }
+        .action-title { font-weight:700; font-size:1rem; color:white; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-bottom:0.4rem; }
+        .action-row { display:flex; justify-content:space-between; align-items:center; margin-bottom:0.35rem; }
+        .genre-badge { font-size:0.7rem; padding:0.15rem 0.5rem; border-radius:4px; border:1px solid var(--card-theme,#DC2626); color:var(--card-theme,#DC2626); font-weight:600; }
+        .diff-badge { font-size:0.75rem; }
+        .star-rating { font-size:0.78rem; color:#F59E0B; }
+        .play-count { font-size:0.75rem; color:#B3B3B3; }
+
+        /* Modal */
+        #action-modal { position:fixed; inset:0; background:rgba(0,0,0,0.96); backdrop-filter:blur(6px); z-index:2000; display:none; align-items:center; justify-content:center; opacity:0; transition:opacity 0.25s ease; }
+        #action-modal.show { opacity:1; }
+        .modal-content {
+            width:min(960px,95vw); background:#111; border-radius:20px;
+            display:flex; flex-direction:column; overflow:hidden;
+            transform:scale(0.9); transition:transform 0.25s cubic-bezier(0.34,1.56,0.64,1);
+            box-shadow:0 0 60px rgba(0,0,0,0.8); border:1px solid rgba(255,255,255,0.08);
+        }
+        #action-modal.show .modal-content { transform:scale(1); }
+
+        .modal-top-bar { padding:0.8rem 1.2rem; display:flex; align-items:center; gap:0.8rem; border-bottom:1px solid rgba(255,255,255,0.07); flex-wrap:wrap; }
+        .modal-emoji { font-size:1.8rem; }
+        .modal-game-title { font-weight:800; font-size:1.1rem; color:white; }
+        .modal-genre-pill { font-size:0.7rem; padding:0.15rem 0.5rem; border-radius:4px; border:1px solid rgba(255,255,255,0.2); color:#B3B3B3; font-weight:600; }
+        .modal-live { display:flex; align-items:center; gap:0.4rem; font-size:0.8rem; color:#10B981; font-weight:700; margin:0 auto; }
+        .live-dot { width:8px; height:8px; border-radius:50%; background:#10B981; animation:livePulse 1s ease-in-out infinite; }
+        @keyframes livePulse { 0%,100%{box-shadow:0 0 0 0 rgba(16,185,129,0.5);} 50%{box-shadow:0 0 0 6px rgba(16,185,129,0);} }
+        .modal-top-actions { display:flex; gap:0.5rem; }
+        .modal-icon-btn { background:rgba(255,255,255,0.08); border:none; color:white; border-radius:8px; padding:0.4rem 0.7rem; cursor:pointer; font-size:1rem; transition:all 0.2s; }
+        .modal-icon-btn:hover { background:rgba(255,255,255,0.15); }
+        .modal-close-btn { background:rgba(220,38,38,0.15); border:none; color:#EF4444; border-radius:8px; padding:0.4rem 0.7rem; cursor:pointer; font-size:1.2rem; line-height:1; transition:all 0.2s; }
+        .modal-close-btn:hover { background:#DC2626; color:white; transform:rotate(90deg); }
+
+        .modal-iframe-area { position:relative; height:min(600px,65vh); background:#000; }
+        .modal-iframe-area iframe { width:100%; height:100%; border:none; }
+        .modal-spinner { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:#000; z-index:5; }
+        .spinner-ring { width:50px; height:50px; border:4px solid rgba(255,255,255,0.1); border-top-color:var(--modal-theme,#DC2626); border-radius:50%; animation:spin 0.8s linear infinite; }
+        @keyframes spin { to{transform:rotate(360deg);} }
+
+        .modal-bottom-bar { padding:0.8rem 1.2rem; display:flex; align-items:center; gap:0.8rem; border-top:1px solid rgba(255,255,255,0.07); flex-wrap:wrap; }
+        .modal-controls { font-size:0.78rem; color:#B3B3B3; flex:1; min-width:0; display:flex; align-items:center; gap:0.4rem; }
+        .modal-btn { padding:0.4rem 1rem; border-radius:8px; font-weight:700; font-size:0.8rem; cursor:pointer; transition:all 0.2s; border:none; }
+        .btn-random { background:#F97316; color:white; }
+        .btn-random:hover { background:#EA580C; transform:scale(1.05); }
+        .btn-fav { background:rgba(255,255,255,0.08); color:white; }
+        .btn-fav:hover,.btn-fav.active { background:rgba(220,38,38,0.3); color:#EF4444; }
+        .btn-share { background:rgba(255,255,255,0.08); color:white; }
+        .btn-share:hover { background:rgba(6,182,212,0.2); color:#06B6D4; }
+
+        /* Toasts */
+        .toast-container { position:fixed; bottom:24px; right:24px; z-index:4000; display:flex; flex-direction:column; gap:10px; pointer-events:none; }
+        .toast { background:#1E1E1E; color:white; padding:0.8rem 1.2rem; border-left:4px solid #F97316; border-radius:10px; font-weight:700; box-shadow:0 4px 20px rgba(0,0,0,0.6); animation:slideIn 0.3s forwards, fadeOut 0.3s 2.7s forwards; }
+        @keyframes slideIn { from{transform:translateX(120%);opacity:0;} to{transform:translateX(0);opacity:1;} }
+        @keyframes fadeOut { from{opacity:1;} to{opacity:0;transform:translateX(120%);} }
+
+        @media(max-width:768px){
+            .action-filter-bar { top:56px; padding:0.6rem 4%; gap:0.5rem; }
+            .filter-search { width:100px; margin-left:0; }
+            .action-grid { grid-template-columns:repeat(2,1fr); gap:12px; }
+            .action-grid-section { padding:1rem 4% 3rem; }
+            .featured-section { padding:1rem 4% 0; }
+            .featured-card { flex:0 0 200px; }
+            .modal-content { width:100vw; border-radius:16px 16px 0 0; align-self:flex-end; }
+            #action-modal { align-items:flex-end; }
+            .modal-iframe-area { height:55vw; min-height:240px; }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Sticky Nav -->
+    <nav>
+        <a href="#" class="logo" onclick="showHome(event)">PlayZone 🎮</a>
+        <div class="search-container">
+            <input type="text" id="game-search" placeholder="Search for games..." onkeyup="handleSearch(this.value)">
+        </div>
+        <div class="nav-links">
+            <a href="#" onclick="showHome(event)">All Games</a>
+            <a href="#" onclick="showActionView(event)">Action</a>
+            <a href="#" onclick="filterGenre('Puzzle')">Puzzle</a>
+        </div>
+    </nav>
+
+    <!-- Main Homepage View -->
+    <div id="main-view">
+        <section class="hero">
+            <div class="hero-content">
+                <h1>Play Free Games Instantly</h1>
+                <h3>No Downloads. No Latency. Pure Fun.</h3>
+
+                <div class="controller-graphic">
+                    <div class="controller-body">
+                        <div class="joystick left-js"></div>
+                        <div class="joystick right-js"></div>
+                        <div class="buttons"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Genre Pills -->
+        <div class="genres-wrapper" id="genre-pills">
+            <!-- Dynamically populated -->
+        </div>
+
+        <!-- Trending Section -->
+        <section id="trending-section">
+            <div class="section-header">
+                <h2>🔥 Trending This Week</h2>
+            </div>
+            <div class="horizontal-scroll" id="trending-grid">
+                <!-- Dynamically populated -->
+            </div>
+        </section>
+
+        <!-- All Games Grid -->
+        <section id="games-section">
+            <div class="section-header">
+                <h2 id="grid-title">🕹️ All Games</h2>
+            </div>
+            <div class="game-grid" id="all-games-grid">
+                <!-- Dynamically populated -->
+            </div>
+        </section>
+    </div>
+
+    <!-- Game Player View -->
+    <div id="game-view">
+        <div class="game-player-container">
+            <a class="back-btn" onclick="showHome(event)">⬅️ Back to Home</a>
+
+            <div class="iframe-wrapper" id="game-container">
+                <!-- Iframe or Coming Soon -->
+            </div>
+
+            <div class="game-details">
+                <h1 id="playing-title">Game Title</h1>
+                <p id="playing-meta"></p>
+                <div style="margin-top: 1.5rem;" id="playing-desc">
+                    Get ready for an epic gaming experience! This premium title is part of our PlayZone collection.
+                </div>
+            </div>
+
+            <div class="section-header" style="margin-top: 4rem; padding-left: 0;">
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Games View -->
+    <div id="action-view">
+        <!-- Hero -->
+        <section class="action-hero">
+            <div class="action-hero-content">
+                <h1>💥 Action Games</h1>
+                <h3>25 Games · All Free · Play Instantly</h3>
+                <div class="hero-stat-pills">
+                    <span class="hero-stat-pill">🔥 8 Hot Right Now</span>
+                    <span class="hero-stat-pill">✨ 3 New Games</span>
+                    <span class="hero-stat-pill">👥 4 Multiplayer</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sticky Filter Bar -->
+        <div class="action-filter-bar" id="action-filter-bar">
+            <span class="filter-pill active" data-genre="All" onclick="filterByGenre('All',this)">All</span>
+            <span class="filter-pill" data-genre="Shooter" onclick="filterByGenre('Shooter',this)">Shooter</span>
+            <span class="filter-pill" data-genre="Fighting" onclick="filterByGenre('Fighting',this)">Fighting</span>
+            <span class="filter-pill" data-genre="Platformer" onclick="filterByGenre('Platformer',this)">Platformer</span>
+            <span class="filter-pill" data-genre="Racing" onclick="filterByGenre('Racing',this)">Racing</span>
+            <span class="filter-pill" data-genre="Physics" onclick="filterByGenre('Physics',this)">Physics</span>
+            <span class="filter-pill" data-genre="Multiplayer" onclick="filterByGenre('Multiplayer',this)">Multiplayer</span>
+            <span class="filter-pill" data-genre="IO Game" onclick="filterByGenre('IO Game',this)">IO</span>
+            <span class="filter-pill" data-genre="Skill" onclick="filterByGenre('Skill',this)">Skill</span>
+            <span class="filter-pill" data-genre="Strategy" onclick="filterByGenre('Strategy',this)">Strategy</span>
+            <span class="clear-filters-link" id="clear-link" onclick="clearActionFilters()">✕ Clear filters</span>
+            <select class="filter-sort" id="action-sort" onchange="applyActionFilters()">
+                <option value="popular">Most Popular</option>
+                <option value="topRated">Top Rated</option>
+                <option value="az">A – Z</option>
+            </select>
+            <input class="filter-search" id="action-search" type="text" placeholder="🔍 Search games…" oninput="debounceSearch(this.value)">
+        </div>
+
+        <!-- Tabs -->
+        <div class="fav-tab-bar">
+            <div class="fav-tab active" id="tab-all" onclick="switchTab('all')">🏠 All Games</div>
+            <div class="fav-tab" id="tab-fav" onclick="switchTab('fav')">⭐ My Favorites</div>
+        </div>
+
+        <!-- Recently Played -->
+        <div class="recent-section" id="recent-section" style="display:none">
+            <h3>🕒 Recently Played</h3>
+            <div class="recent-row" id="recent-row"></div>
+        </div>
+
+        <!-- Editor's Pick Featured Row -->
+        <div class="featured-section">
+            <h2>🏆 Editor's Picks</h2>
+            <div class="featured-row" id="featured-row"></div>
+        </div>
+
+        <!-- Main Grid -->
+        <div class="action-grid-section">
+            <div class="action-grid" id="action-games-grid"></div>
+        </div>
+    </div>
+
+    <!-- Premium Game Modal -->
+    <div id="action-modal" onclick="handleModalBackdrop(event)">
+        <div class="modal-content" id="modal-inner">
+            <div class="modal-top-bar" id="modal-top-bar" style="background:rgba(0,0,0,0.5)">
+                <span class="modal-emoji" id="modal-emoji">🎮</span>
+                <span class="modal-game-title" id="modal-title">Game</span>
+                <span class="modal-genre-pill" id="modal-genre">Genre</span>
+                <div class="modal-live"><div class="live-dot"></div> PLAYING</div>
+                <div class="modal-top-actions">
+                    <button class="modal-icon-btn" onclick="toggleFullscreen()" title="Fullscreen">⛶</button>
+                    <button class="modal-close-btn" onclick="closeActionModal()">✕</button>
+                </div>
+            </div>
+            <div class="modal-iframe-area" id="modal-iframe-area">
+                <div class="modal-spinner" id="modal-spinner">
+                    <div class="spinner-ring" id="spinner-ring"></div>
+                </div>
+                <!-- iframe injected here on open -->
+            </div>
+            <div class="modal-bottom-bar">
+                <div class="modal-controls" id="modal-controls">⌨️ Controls load here</div>
+                <div style="display:flex;gap:0.6rem">
+                    <button class="modal-btn btn-random" onclick="playRandomActionGame()">🎲 Random</button>
+                    <button class="modal-btn btn-fav" id="modal-fav-btn" onclick="toggleModalFav()">⭐ Favorite</button>
+                    <button class="modal-btn btn-share" onclick="shareGame()">🔗 Share</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <footer>
+        <div class="footer-links">
+            <a href="#">About</a>
+            <a href="#">Privacy Policy</a>
+            <a href="#">Terms of Service</a>
+            <a href="#">Contact</a>
+            <a href="#">Submit a Game</a>
+        </div>
+        <p style="color: var(--text-secondary); font-size: 0.9rem;">© 2026 PlayZone Game Portal. All rights reserved.
+        </p>
+    </footer>
+
+    <script>
+        // ===== 25 ACTION GAMES DATA =====
+        const actionGames = [
+            { id: 1, title: 'Combat Strike', genre: 'Shooter', rating: 4.8, plays: '1.2M', playsNum: 1200000, themeColor: '#DC2626', emoji: '🔫', badge: 'HOT', badgeClass: 'badge-hot', difficulty: 'Hard', controls: 'WASD to move, Click to shoot', iframeSrc: 'https://games.gdevelop-app.com/game-7b8c/' },
+            { id: 2, title: 'Street Brawler', genre: 'Fighting', rating: 4.6, plays: '850K', playsNum: 850000, themeColor: '#991B1B', emoji: '🥊', badge: 'PRO', badgeClass: 'badge-epic', difficulty: 'Medium', controls: 'Arrows to move, Z/X to punch', iframeSrc: 'https://games.gdevelop-app.com/game-8d2a/' },
+            { id: 3, title: 'Tank Trouble', genre: 'Strategy', rating: 4.5, plays: '2.3M', playsNum: 2300000, themeColor: '#16A34A', emoji: '🚜', badge: 'FUN', badgeClass: 'badge-funny', difficulty: 'Easy', controls: 'Arrows to move, M to fire', iframeSrc: 'https://games.gdevelop-app.com/game-c9e1/' },
+            { id: 4, title: 'Blockpost', genre: 'Shooter', rating: 4.7, plays: '3.1M', playsNum: 3100000, themeColor: '#2563EB', emoji: '🧱', badge: 'NEW', badgeClass: 'badge-new', difficulty: 'Hard', controls: 'WASD & Mouse', iframeSrc: 'https://games.gdevelop-app.com/game-f3b0/' },
+            { id: 5, title: 'Stickman Hook', genre: 'Physics', rating: 4.9, plays: '5.2M', playsNum: 5200000, themeColor: '#7C3AED', emoji: '🪝', badge: 'GOLD', badgeClass: 'badge-gold', difficulty: 'Medium', controls: 'Hold to swing', iframeSrc: 'https://games.gdevelop-app.com/game-a1b2/' },
+            { id: 6, title: 'Bullet Force', genre: 'Shooter', rating: 4.8, plays: '4.1M', playsNum: 4100000, themeColor: '#DC2626', emoji: '🎯', badge: 'HOT', badgeClass: 'badge-hot', difficulty: 'Hard', controls: 'Standard FPS', iframeSrc: 'https://games.gdevelop-app.com/game-d4e5/' },
+            { id: 7, title: 'Madalin Stunt Cars', genre: 'Racing', rating: 4.6, plays: '2.8M', playsNum: 2800000, themeColor: '#F59E0B', emoji: '🏎️', badge: 'EPIC', badgeClass: 'badge-epic', difficulty: 'Medium', controls: 'Arrows to drive', iframeSrc: 'https://games.gdevelop-app.com/game-e6f7/' },
+            { id: 8, title: 'Shell Shockers', genre: 'Multiplayer', rating: 4.7, plays: '6.3M', playsNum: 6300000, themeColor: '#D97706', emoji: '🥚', badge: 'GOLD', badgeClass: 'badge-gold', difficulty: 'Hard', controls: 'WASD, Click to shoot', iframeSrc: 'https://games.gdevelop-app.com/game-g8h9/' },
+            { id: 9, title: 'Vex 7', genre: 'Platformer', rating: 4.9, plays: '1.9M', playsNum: 1900000, themeColor: '#2563EB', emoji: '🏃', badge: 'NEW', badgeClass: 'badge-new', difficulty: 'Hard', controls: 'Arrows / WASD', iframeSrc: 'https://games.gdevelop-app.com/game-i0j1/' },
+            { id: 10, title: 'Subway Surfers', genre: 'Skill', rating: 4.8, plays: '15M', playsNum: 15000000, themeColor: '#F97316', emoji: '🛹', badge: 'HOT', badgeClass: 'badge-hot', difficulty: 'Medium', controls: 'Arrows to dodge', iframeSrc: 'https://games.gdevelop-app.com/game-k2l3/' },
+            { id: 11, title: 'Moto X3M', genre: 'Racing', rating: 4.9, plays: '8.4M', playsNum: 8400000, themeColor: '#EF4444', emoji: '🏍️', badge: 'GOLD', badgeClass: 'badge-gold', difficulty: 'Medium', controls: 'Arrows to balance', iframeSrc: 'https://games.gdevelop-app.com/game-m4n5/' },
+            { id: 12, title: 'Temple Run', genre: 'Skill', rating: 4.5, plays: '12M', playsNum: 12000000, themeColor: '#D97706', emoji: '🗿', badge: 'EPIC', badgeClass: 'badge-epic', difficulty: 'Medium', controls: 'Arrows to run', iframeSrc: 'https://games.gdevelop-app.com/game-o6p7/' }
+        ];
+
+        
+
+        const FEATURED_IDS = [5,11,9,3,4]; // Stickman Hook, Moto X3M, Vex 7, Tank Trouble, Blockpost
+        const favorites = new Set();
+        const recentlyPlayed = [];
+        let currentActionGenre = 'All';
+        let currentActionTab = 'all';
+        let activeGameId = null;
+        let searchDebounceTimer = null;
+
+        // ===== UTILS =====
+        function starsHtml(r) {
+            const full = Math.floor(r); const half = r % 1 >= 0.5 ? 1 : 0;
+            return '⭐'.repeat(full) + (half ? '½' : '') + '☆'.repeat(5 - full - half);
+        }
+        function diffEmoji(d) { return d==='Easy'?'🟢':d==='Medium'?'🟡':'🔴'; }
+        function hexAlpha(hex, a) { return hex + Math.round(a*255).toString(16).padStart(2,'0'); }
+        function showToast(msg, color='#F97316') {
+            const c = document.getElementById('toast-container');
+            const t = document.createElement('div');
+            t.className = 'toast'; t.style.borderLeftColor = color;
+            t.innerText = msg; c.appendChild(t);
+            setTimeout(() => c.contains(t) && c.removeChild(t), 3000);
+        }
+
+        // ===== FEATURED ROW =====
+        function renderFeaturedRow() {
+            const row = document.getElementById('featured-row');
+            row.innerHTML = FEATURED_IDS.map(id => {
+                const g = actionGames.find(x => x.id === id);
+                return `<div class="featured-card" onclick="openActionModal(${g.id})"
+                    style="box-shadow:0 0 20px ${hexAlpha(g.themeColor,0.3)}">
+                    <div class="featured-thumb" style="background:linear-gradient(135deg,${hexAlpha(g.themeColor,0.6)},${hexAlpha(g.themeColor,0.15)})">
+                        <div class="grid-overlay"></div>
+                        <span style="position:relative;z-index:2;filter:drop-shadow(0 0 12px ${g.themeColor})">${g.emoji}</span>
+                        <span class="editors-banner">🏆 Editor's Pick</span>
+                    </div>
+                    <div class="featured-info">
+                        <div class="featured-title">${g.title}</div>
+                        <div class="featured-genre">${g.genre} · ⭐ ${g.rating}</div>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        // ===== GAME CARDS =====
+        function cardHtml(game, index) {
+            const glow = hexAlpha(game.themeColor, 0.45);
+            return `<div class="action-card" id="card-${game.id}"
+                style="--card-theme:${game.themeColor};--card-glow:${glow};transition-delay:${index*60}ms"
+                onclick="openActionModal(${game.id})">
+                <div class="action-thumb" style="background:linear-gradient(135deg,${hexAlpha(game.themeColor,0.6)},${hexAlpha(game.themeColor,0.15)})">
+                    <div class="thumb-grid"></div>
+                    <span class="thumb-emoji" style="filter:drop-shadow(0 0 14px ${game.themeColor})">${game.emoji}</span>
+                    <div class="particle-ring">
+                        <div class="particle"></div><div class="particle"></div>
+                        <div class="particle"></div><div class="particle"></div>
+                    </div>
+                    <div class="thumb-overlay">
+                        <button class="play-now-btn">▶️ PLAY NOW</button>
+                    </div>
+                </div>
+                <span class="card-badge ${game.badgeClass}">${game.badge}</span>
+                <button class="fav-btn ${favorites.has(game.id)?'active':''}"
+                    onclick="toggleFav(event,${game.id})">${favorites.has(game.id)?'❤️':'🤍'}</button>
+                <div class="action-info">
+                    <div class="action-title">${game.title}</div>
+                    <div class="action-row">
+                        <span class="genre-badge">${game.genre}</span>
+                        <span class="diff-badge">${diffEmoji(game.difficulty)} ${game.difficulty}</span>
+                    </div>
+                    <div class="action-row">
+                        <span class="star-rating">${starsHtml(game.rating)}</span>
+                        <span class="play-count">👤 ${game.plays}</span>
+                    </div>
+                </div>
+            </div>`;
+        }
+
+        function renderActionGamesGrid(list) {
+            const c = document.getElementById('action-games-grid');
+            if (!list.length) { c.innerHTML = '<div class="empty-state">😕 No games match your search</div>'; return; }
+            c.innerHTML = list.map((g,i) => cardHtml(g,i)).join('');
+            requestAnimationFrame(() => c.querySelectorAll('.action-card').forEach(el => el.classList.add('loaded')));
+        }
+
+        // ===== RECENTLY PLAYED =====
+        function addToRecent(id) {
+            const idx = recentlyPlayed.indexOf(id);
+            if (idx !== -1) recentlyPlayed.splice(idx,1);
+            recentlyPlayed.unshift(id);
+            if (recentlyPlayed.length > 5) recentlyPlayed.pop();
+            renderRecent();
+        }
+        function renderRecent() {
+            const sec = document.getElementById('recent-section');
+            const row = document.getElementById('recent-row');
+            if (!recentlyPlayed.length) { sec.style.display = 'none'; return; }
+            sec.style.display = 'block';
+            row.innerHTML = recentlyPlayed.map(id => {
+                const g = actionGames.find(x=>x.id===id);
+                return `<div class="recent-chip" onclick="openActionModal(${id})">${g.emoji} ${g.title}</div>`;
+            }).join('');
+        }
+
+        // ===== FILTERS & TABS =====
+        function filterByGenre(genre, el) {
+            currentActionGenre = genre;
+            document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+            el.classList.add('active');
+            const clearLink = document.getElementById('clear-link');
+            clearLink.classList.toggle('visible', genre !== 'All' || document.getElementById('action-search').value.trim());
+            applyActionFilters();
+        }
+
+        function debounceSearch(val) {
+            clearTimeout(searchDebounceTimer);
+            searchDebounceTimer = setTimeout(() => {
+                const clearLink = document.getElementById('clear-link');
+                clearLink.classList.toggle('visible', val.trim() || currentActionGenre !== 'All');
+                applyActionFilters();
+            }, 300);
+        }
+
+        function applyActionFilters() {
+            const q = (document.getElementById('action-search')?.value || '').toLowerCase();
+            const sort = document.getElementById('action-sort')?.value || 'popular';
+            let list = actionGames.filter(g => {
+                const genreOk = currentActionGenre === 'All' || g.genre === currentActionGenre;
+                const searchOk = !q || g.title.toLowerCase().includes(q) || g.genre.toLowerCase().includes(q);
+                const tabOk = currentActionTab === 'all' || favorites.has(g.id);
+                return genreOk && searchOk && tabOk;
+            });
+            if (sort === 'popular')  list.sort((a,b) => b.playsNum - a.playsNum);
+            else if (sort === 'topRated') list.sort((a,b) => b.rating - a.rating);
+            else if (sort === 'az') list.sort((a,b) => a.title.localeCompare(b.title));
+            renderActionGamesGrid(list);
+            window.scrollTo({top: document.getElementById('action-filter-bar').offsetTop - 80, behavior:'smooth'});
+        }
+
+        function clearActionFilters() {
+            currentActionGenre = 'All';
+            document.getElementById('action-search').value = '';
+            document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+            document.querySelector('.filter-pill[data-genre="All"]').classList.add('active');
+            document.getElementById('clear-link').classList.remove('visible');
+            applyActionFilters();
+        }
+
+        function switchTab(tab) {
+            currentActionTab = tab;
+            document.getElementById('tab-all').classList.toggle('active', tab==='all');
+            document.getElementById('tab-fav').classList.toggle('active', tab==='fav');
+            applyActionFilters();
+        }
+
+        // ===== FAVORITES =====
+        function toggleFav(e, id) {
+            e.stopPropagation();
+            if (favorites.has(id)) { favorites.delete(id); showToast('Removed from favorites'); }
+            else { favorites.add(id); showToast('⭐ Added to favorites!', '#EF4444'); }
+            // Update card button
+            const btn = document.querySelector(`#card-${id} .fav-btn`);
+            if (btn) { btn.textContent = favorites.has(id)?'❤️':'🤍'; btn.classList.toggle('active', favorites.has(id)); }
+            if (activeGameId === id) updateModalFavBtn();
+        }
+        function toggleModalFav() {
+            if (!activeGameId) return;
+            toggleFav({stopPropagation:()=>{}}, activeGameId);
+        }
+        function updateModalFavBtn() {
+            const btn = document.getElementById('modal-fav-btn');
+            if (!btn || !activeGameId) return;
+            btn.classList.toggle('active', favorites.has(activeGameId));
+            btn.textContent = favorites.has(activeGameId) ? '❤️ Favorited' : '🤍 Favorite';
+        }
+
+        // ===== MODAL =====
+        function openActionModal(id) {
+            const game = actionGames.find(g => g.id === id);
+            if (!game) return;
+            activeGameId = id;
+            addToRecent(id);
+            // Increment play count visually
+            game.playsNum += Math.floor(Math.random()*99)+1;
+            game.plays = (game.playsNum/1000000).toFixed(1) + 'M';
+
+            // Set theme color on modal
+            const modal = document.getElementById('action-modal');
+            const topBar = document.getElementById('modal-top-bar');
+            topBar.style.background = `linear-gradient(90deg, ${hexAlpha(game.themeColor,0.3)}, rgba(0,0,0,0.5))`;
+            topBar.style.borderBottomColor = hexAlpha(game.themeColor, 0.4);
+            document.getElementById('modal-emoji').textContent = game.emoji;
+            document.getElementById('modal-title').textContent = game.title;
+            document.getElementById('modal-genre').textContent = game.genre;
+            document.getElementById('modal-controls').innerHTML = `⌨️ ${game.controls}`;
+            document.getElementById('spinner-ring').style.borderTopColor = game.themeColor;
+            updateModalFavBtn();
+
+            // Show spinner, inject iframe lazily
+            const area = document.getElementById('modal-iframe-area');
+            const spinner = document.getElementById('modal-spinner');
+            spinner.style.display = 'flex';
+            // Remove old iframe if exists
+            const old = area.querySelector('iframe');
+            if (old) old.remove();
+            const iframe = document.createElement('iframe');
+            iframe.src = game.iframeSrc;
+            iframe.setAttribute('allow', 'fullscreen; autoplay; encrypted-media');
+            iframe.setAttribute('allowfullscreen', 'true');
+            iframe.setAttribute('frameborder', '0');
+            iframe.setAttribute('scrolling', 'no');
+            iframe.onload = () => { spinner.style.display = 'none'; };
+            area.appendChild(iframe);
+
+            modal.style.display = 'flex';
+            requestAnimationFrame(() => modal.classList.add('show'));
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeActionModal() {
+            const modal = document.getElementById('action-modal');
+            modal.classList.remove('show');
+            setTimeout(() => {
+                modal.style.display = 'none';
+                const area = document.getElementById('modal-iframe-area');
+                const iframe = area.querySelector('iframe');
+                if (iframe) iframe.remove();
+                document.getElementById('modal-spinner').style.display = 'flex';
+                document.body.style.overflow = '';
+                activeGameId = null;
+            }, 250);
+        }
+
+        function handleModalBackdrop(e) {
+            if (e.target === document.getElementById('action-modal')) closeActionModal();
+        }
+
+        function playRandomActionGame() {
+            const rand = actionGames[Math.floor(Math.random()*actionGames.length)];
+            openActionModal(rand.id);
+        }
+
+        function toggleFullscreen() {
+            const iframe = document.querySelector('#modal-iframe-area iframe');
+            if (!iframe) return;
+            if (document.fullscreenElement) document.exitFullscreen();
+            else iframe.requestFullscreen && iframe.requestFullscreen();
+        }
+
+        function shareGame() {
+            if (activeGameId) {
+                const g = actionGames.find(x=>x.id===activeGameId);
+                navigator.clipboard.writeText(g.iframeSrc).then(()=>showToast('🔗 Link copied!', '#06B6D4'));
+            }
+        }
+
+        // ===== SHOW / HIDE VIEWS =====
+        function showActionView(e) {
+            if (e) e.preventDefault();
+            ['main-view','game-view'].forEach(id => {
+                document.getElementById(id).style.opacity = '0';
+            });
+            setTimeout(() => {
+                ['main-view','game-view'].forEach(id => document.getElementById(id).style.display = 'none');
+                const av = document.getElementById('action-view');
+                av.style.display = 'block';
+                void av.offsetWidth;
+                av.style.opacity = '1';
+                window.scrollTo(0,0);
+                currentCategory = 'Action';
+                renderGenres();
+                renderFeaturedRow();
+                applyActionFilters();
+            }, 300);
+        }
+
+        // ===== MAIN SITE JS =====
+        const GAMES_DATA = [
+            {id:1,title:'Snake Evolved',category:'Action',plays:'3.1M',src:'games/snake.html',color:'#10B981',icon:'🐍',trending:true},
+            {id:2,title:'Asteroid Blaster',category:'Action',plays:'2.1M',src:'games/asteroids.html',color:'#06B6D4',icon:'🚀',trending:true},
+            {id:3,title:'Brick Breaker Pro',category:'Action',plays:'1.5M',src:'games/brickbreaker.html',color:'#F59E0B',icon:'🧱',trending:false},
+            {id:4,title:'Zombie Survival',category:'Action',plays:'3.4M',src:'games/zombies.html',color:'#EF4444',icon:'🧟',trending:true},
+            {id:5,title:'2048 Remastered',category:'Puzzle',plays:'4.2M',src:'games/2048.html',color:'#7C3AED',icon:'🔢',trending:true},
+            {id:6,title:'Flappy Rocket',category:'Action',plays:'1.8M',src:'games/flappyrocket.html',color:'#FBBF24',icon:'🚀',trending:false},
+            {id:7,title:'Neon Tetris',category:'Puzzle',plays:'5.1M',src:'games/tetris.html',color:'#EC4899',icon:'🟦',trending:true},
+            {id:8,title:'Car Dodge',category:'Racing',plays:'2.5M',src:'games/cardodge.html',color:'#F43F5E',icon:'🏎️',trending:true},
+            {id:9,title:'Memory Match',category:'Puzzle',plays:'1.1M',src:'games/memory.html',color:'#8B5CF6',icon:'🧠',trending:false},
+            {id:10,title:'Fruit Slicer',category:'Action',plays:'4.1M',src:'games/fruitninja.html',color:'#EF4444',icon:'🍉',trending:true},
+            {id:11,title:'Tower Defense',category:'Action',plays:'1.2M',src:'games/towerdefense.html',color:'#3B82F6',icon:'🏰',trending:false},
+            {id:12,title:'Ping Pong Duel',category:'Sports',plays:'980K',src:'games/pingpong.html',color:'#E2E8F0',icon:'🏓',trending:false}
+        ];
+        const CATEGORIES = ['All','Action','Puzzle','Racing','Sports','Shooting','Cards','Brain','Multiplayer','Casual'];
+        let currentCategory = 'All';
+
+        function init() { renderGenres(); renderTrending(); renderGames(GAMES_DATA); }
+
+        function renderGenres() {
+            document.getElementById('genre-pills').innerHTML = CATEGORIES.map(cat => `
+                <div class="genre-pill ${cat===currentCategory?'active':''}"
+                     onclick="${cat==='Action'?'showActionView(event)':("filterGenre('"+cat+"')")}">${getIcon(cat)} ${cat}</div>
+            `).join('');
+        }
+
+        function getIcon(cat) {
+            return {'Action':'💥','Puzzle':'🧩','Racing':'🏎️','Sports':'⚽','Shooting':'🔫','Cards':'♠️','Brain':'🧠','Multiplayer':'👥','Casual':'🕹️','All':'🌐'}[cat]||'🎮';
+        }
+
+        function renderTrending() {
+            const trending = GAMES_DATA.filter(g=>g.trending);
+            document.getElementById('trending-grid').innerHTML = trending.map((g,i)=>createGameCard(g,i<3?['🥇','🥈','🥉'][i]:'')).join('');
+            animateCards();
+        }
+
+        function renderGames(data) {
+            document.getElementById('all-games-grid').innerHTML = data.map(g=>createGameCard(g)).join('');
+            animateCards();
+        }
+
+        function createGameCard(game, crown='') {
+            return `<div class="game-card" onclick="playGame(${game.id})">
+                ${crown?`<div class="crown">${crown}</div>`:''}
+                <div class="thumbnail-container">
+                    <div style="background:${game.color};width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:4rem">${game.icon}</div>
+                    <div class="play-overlay">▶️</div>
+                </div>
+                <div class="game-info">
+                    <div class="game-title">${game.title}</div>
+                    <div class="game-meta">
+                        <span class="category-badge">${game.category}</span>
+                        <span class="play-count">👤 ${game.plays}</span>
+                    </div>
+                </div>
+            </div>`;
+        }
+
+        function animateCards() {
+            document.querySelectorAll('.game-card').forEach((c,i)=>setTimeout(()=>c.classList.add('animate'),i*50));
+        }
+
+        function filterGenre(cat) {
+            currentCategory = cat; renderGenres();
+            const filtered = cat==='All'?GAMES_DATA:GAMES_DATA.filter(g=>g.category===cat);
+            document.getElementById('grid-title').innerText = cat==='All'?'🕹️ All Games':`${getIcon(cat)} ${cat} Games`;
+            renderGames(filtered);
+            document.getElementById('games-section').scrollIntoView({behavior:'smooth'});
+        }
+
+        function handleSearch(query) {
+            const filtered = GAMES_DATA.filter(g=>g.title.toLowerCase().includes(query.toLowerCase())||g.category.toLowerCase().includes(query.toLowerCase()));
+            renderGames(filtered);
+            document.getElementById('grid-title').innerText = `🔍 Results for "${query}"`;
+        }
+
+        function playGame(id) {
+            const game = GAMES_DATA.find(g=>g.id===id); if(!game) return;
+            document.getElementById('playing-title').innerText = game.title;
+            document.getElementById('playing-meta').innerText = `${game.category} • ${game.plays} plays`;
+            const container = document.getElementById('game-container');
+            container.innerHTML = `<iframe src="${game.src}" allowfullscreen></iframe>`;
+            document.getElementById('main-view').style.opacity = '0';
+            setTimeout(()=>{
+                document.getElementById('main-view').style.display = 'none';
+                document.getElementById('game-view').style.display = 'block';
+                document.getElementById('game-view').style.opacity = '1';
+                window.scrollTo(0,0);
+            }, 500);
+        }
+
+        function showHome(e) {
+            if(e) e.preventDefault();
+            ['game-view','action-view'].forEach(id=>{ document.getElementById(id).style.opacity='0'; });
+            setTimeout(()=>{
+                ['game-view','action-view'].forEach(id=>document.getElementById(id).style.display='none');
+                document.getElementById('main-view').style.display = 'block';
+                document.getElementById('main-view').style.opacity = '1';
+                window.scrollTo(0,0);
+                document.getElementById('game-search').value = '';
+                currentCategory = 'All'; renderGenres(); renderGames(GAMES_DATA);
+                document.getElementById('grid-title').innerText = '🕹️ All Games';
+            }, 500);
+        }
+
+        // ESC to close modal
+        document.addEventListener('keydown', e => { if(e.key==='Escape') closeActionModal(); });
+
+        window.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+
+</html>
+
+

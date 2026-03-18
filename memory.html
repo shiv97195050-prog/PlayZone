@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory Match</title>
+    <style>
+        body { margin:0; display:flex; flex-direction:column; align-items:center; justify-content:center; background:#0F172A; min-height:100vh; font-family:'Nunito', sans-serif; color:white; overflow:hidden; }
+        h1 { color:#FCD34D; font-size:3.5rem; margin:10px 0; font-family:'Fredoka', sans-serif; text-shadow:0 0 15px rgba(252,211,77,0.5); }
+        .stats { display:flex; gap:20px; font-size:1.5rem; font-weight:bold; margin-bottom:20px; background:#1E293B; padding:15px 30px; border-radius:50px; border:2px solid #334155; box-shadow:0 10px 15px rgba(0,0,0,0.5); }
+        .stat-val { color:#38BDF8; }
+        
+        .grid { display:grid; grid-template-columns:repeat(4, 1fr); gap:15px; perspective:1000px; padding:20px; background:rgba(255,255,255,0.02); border-radius:20px; border:1px solid rgba(255,255,255,0.05); }
+        .card { width:80px; height:80px; position:relative; transform-style:preserve-3d; transition:transform 0.6s cubic-bezier(0.175,0.885,0.32,1.275); cursor:pointer; }
+        @media (max-width:400px) { .card { width:60px; height:60px; } .grid { gap:10px; } h1 { font-size:2.5rem; } }
+
+        .card.flipped { transform:rotateY(180deg); }
+        .card.matched { transform:rotateY(180deg) scale(0.95); opacity:0.8; cursor:default; }
+        
+        .front, .back { position:absolute; width:100%; height:100%; backface-visibility:hidden; display:flex; justify-content:center; align-items:center; font-size:3rem; border-radius:15px; box-shadow:0 4px 8px rgba(0,0,0,0.3); }
+        .front { background:linear-gradient(135deg, #6366F1, #8B5CF6); border:2px solid #A78BFA; }
+        .front::after { content:'?'; color:rgba(255,255,255,0.5); font-weight:bold; }
+        .back { background:#1E293B; transform:rotateY(180deg); border:2px solid #38BDF8; }
+
+        .card.matched .back { border-color:#10B981; background:#064E3B; box-shadow:0 0 20px rgba(16,185,129,0.5); animation:pulse 1.5s infinite; }
+        @keyframes pulse { 0%,100%{box-shadow:0 0 10px rgba(16,185,129,0.3);} 50%{box-shadow:0 0 25px rgba(16,185,129,0.8);} }
+        
+        #game-over { position:absolute; inset:0; background:rgba(15,23,42,0.95); display:flex; flex-direction:column; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:0.3s; z-index:20; }
+        #game-over.show { opacity:1; pointer-events:all; }
+        .go-content { text-align:center; transform:translateY(50px); transition:0.5s cubic-bezier(0.175,0.885,0.32,1.275); background:#1E293B; padding:50px; border-radius:30px; border:4px solid #FCD34D; box-shadow:0 0 50px rgba(252,211,77,0.3); }
+        #game-over.show .go-content { transform:translateY(0); }
+        
+        button { margin-top:30px; padding:15px 40px; background:#FCD34D; color:#0F172A; border:none; border-radius:50px; font-weight:bold; font-size:1.5rem; cursor:pointer; box-shadow:0 10px 0 #B45309; transition:0.1s; text-transform:uppercase; font-family:inherit;}
+        button:active { transform:translateY(10px); box-shadow:none; }
+    </style>
+</head>
+<body>
+
+    <h1>Memory Match</h1>
+    <div class="stats">
+        <div>Moves: <span class="stat-val" id="moves">0</span></div>
+        <div>Time: <span class="stat-val" id="time">0:00</span></div>
+    </div>
+
+    <div class="grid" id="grid"></div>
+
+    <div id="game-over">
+        <div class="go-content">
+            <h1 style="font-size:4rem; margin-bottom:0;">WELL DONE!</h1>
+            <p style="font-size:1.5rem; color:#94A3B8; margin-top:10px;">You found all pairs.</p>
+            <div style="font-size:2rem; margin:20px 0;">Moves: <span id="final-moves" class="stat-val">0</span></div>
+            <div style="font-size:2rem; margin:20px 0;">Time: <span id="final-time" class="stat-val">0:00</span></div>
+            <button onclick="init()">Play Again</button>
+        </div>
+    </div>
+
+    <script>
+        const grid = document.getElementById('grid');
+        const emojis = ['🚀','👽','👾','🤖','🛸','☄️','🌔','⭐️'];
+        let cards = [];
+        let flippedCards = [];
+        let matchedCount = 0;
+        let moves = 0;
+        let timer = 0;
+        let timerInterval;
+        let isLocked = false;
+
+        function shuffle(arr) {
+            for(let i = arr.length - 1; i > 0; i--){
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+        }
+
+        function formatTime(s) {
+            let m = Math.floor(s/60);
+            let sec = s%60;
+            return `${m}:${sec<10?'0':''}${sec}`;
+        }
+
+        function spawnConfetti() {
+            const colors = ['#FCD34D', '#ef4444', '#38BDF8', '#10B981', '#A78BFA'];
+            for(let i=0; i<100; i++) {
+                let p = document.createElement('div');
+                p.style.position = 'absolute';
+                p.style.left = (Math.random() * innerWidth) + 'px';
+                p.style.top = -20 + 'px';
+                p.style.width = '10px'; p.style.height = '20px';
+                p.style.background = colors[Math.floor(Math.random()*colors.length)];
+                p.style.transform = `rotate(${Math.random()*360}deg)`;
+                p.style.zIndex = 30;
+                document.body.appendChild(p);
+
+                let xObj = (Math.random()-0.5) * 500;
+                let t = Math.random()*2 + 2;
+                p.animate([
+                    { transform: `translate(0,0) rotate(0deg)` },
+                    { transform: `translate(${xObj}px, ${innerHeight + 50}px) rotate(${Math.random()*720}deg)` }
+                ], { duration: t*1000, easing: 'ease-in' }).onfinish = ()=>p.remove();
+            }
+        }
+
+        function createCard(icon, index) {
+            let card = document.createElement('div');
+            card.className = 'card';
+            card.dataset.val = icon;
+            card.dataset.index = index;
+
+            let front = document.createElement('div'); front.className = 'front';
+            let back = document.createElement('div'); back.className = 'back';
+            back.innerText = icon;
+
+            card.appendChild(front); card.appendChild(back);
+
+            card.addEventListener('click', () => {
+                // start timer on first click
+                if(moves===0 && flippedCards.length===0 && !timerInterval) {
+                    timerInterval = setInterval(()=>{
+                        timer++;
+                        document.getElementById('time').innerText = formatTime(timer);
+                    },1000);
+                }
+
+                if(isLocked || card.classList.contains('flipped') || card.classList.contains('matched')) return;
+
+                card.classList.add('flipped');
+                flippedCards.push(card);
+
+                if(flippedCards.length === 2) {
+                    moves++;
+                    document.getElementById('moves').innerText = moves;
+                    isLocked = true;
+
+                    if(flippedCards[0].dataset.val === flippedCards[1].dataset.val) {
+                        // Match
+                        setTimeout(() => {
+                            flippedCards[0].classList.add('matched');
+                            flippedCards[1].classList.add('matched');
+                            flippedCards = [];
+                            matchedCount += 2;
+                            isLocked = false;
+                            
+                            if(matchedCount === cards.length) {
+                                clearInterval(timerInterval);
+                                document.getElementById('final-moves').innerText = moves;
+                                document.getElementById('final-time').innerText = formatTime(timer);
+                                setTimeout(()=>{
+                                    document.getElementById('game-over').classList.add('show');
+                                    spawnConfetti();
+                                }, 500);
+                            }
+                        }, 500);
+                    } else {
+                        // No Match
+                        setTimeout(() => {
+                            flippedCards[0].classList.remove('flipped');
+                            flippedCards[1].classList.remove('flipped');
+                            flippedCards = [];
+                            isLocked = false;
+                        }, 1000);
+                    }
+                }
+            });
+
+            return card;
+        }
+
+        function init() {
+            grid.innerHTML = '';
+            cards = [...emojis, ...emojis];
+            shuffle(cards);
+            flippedCards = [];
+            matchedCount = 0; moves = 0; timer = 0;
+            isLocked = false;
+            clearInterval(timerInterval);
+            timerInterval = null;
+
+            document.getElementById('moves').innerText = moves;
+            document.getElementById('time').innerText = '0:00';
+            document.getElementById('game-over').classList.remove('show');
+
+            cards.forEach((c, i) => {
+                let node = createCard(c, i);
+                node.style.animation = `appear 0.5s ${i*0.05}s backwards`;
+                grid.appendChild(node);
+            });
+        }
+
+        // Add intro appear anim
+        const style = document.createElement('style');
+        style.textContent = `@keyframes appear { 0% { opacity:0; transform:scale(0) translateY(100px); } 100% {opacity:1; transform:scale(1) translateY(0); } }`;
+        document.head.appendChild(style);
+
+        init();
+    </script>
+</body>
+</html>

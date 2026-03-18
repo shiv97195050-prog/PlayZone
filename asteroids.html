@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asteroid Blaster</title>
+    <style>
+        body { margin:0; overflow:hidden; background:#000; color:white; font-family:'Nunito', sans-serif; }
+        canvas { display:block; width:100vw; height:100vh; }
+        #ui { position:absolute; top:20px; left:20px; right:20px; display:flex; justify-content:space-between; z-index:10; pointer-events:none; }
+        .stat { font-size:1.5rem; text-shadow:0 0 10px #06B6D4; color:#06B6D4; font-weight:bold; }
+        .lives { color:#ef4444; text-shadow:0 0 10px #ef4444; }
+        #game-over { position:absolute; inset:0; background:rgba(0,0,0,0.8); display:flex; flex-direction:column; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:0.3s; z-index:20; }
+        #game-over.show { opacity:1; pointer-events:all; }
+        button { margin-top:20px; padding:12px 24px; background:none; color:#06B6D4; border:2px solid #06B6D4; border-radius:30px; font-size:1.2rem; cursor:pointer; font-weight:bold; transition:0.2s; text-transform:uppercase; letter-spacing:1px; box-shadow:0 0 15px rgba(6,182,212,0.3) inset, 0 0 15px rgba(6,182,212,0.3); }
+        button:hover { background:#06B6D4; color:#000; box-shadow:0 0 25px rgba(6,182,212,0.8); transform:scale(1.05); }
+    </style>
+</head>
+<body>
+    <div id="ui">
+        <div class="stat">SCORE: <span id="score">0</span></div>
+        <div class="stat lives">LIVES: <span id="lives">❤️❤️❤️</span></div>
+    </div>
+    <div id="game-over">
+        <h1 style="color:#ef4444; text-shadow:0 0 20px #ef4444; font-size:4rem; margin:0;">MISSION FAILED</h1>
+        <h2 style="color:#06B6D4;">FINAL SCORE: <span id="final-score">0</span></h2>
+        <button onclick="init()">Restart Mission</button>
+    </div>
+    <canvas id="gameCanvas"></canvas>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        let width, height;
+
+        let player, bullets, asteroids, particles, stars;
+        let score = 0, lives = 3, isGameOver = false;
+        let keys = {};
+
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+            if(!player) init();
+        }
+        window.addEventListener('resize', resize);
+
+        class Player {
+            constructor() {
+                this.x = width/2; this.y = height/2;
+                this.radius = 15; this.angle = -Math.PI/2;
+                this.rotation = 0; this.vel = {x:0,y:0};
+                this.thrusting = false; this.invuln = 120; // frames
+            }
+            update() {
+                if(this.invuln > 0) this.invuln--;
+                
+                if(keys['a'] || keys['ArrowLeft']) this.angle -= 0.1;
+                if(keys['d'] || keys['ArrowRight']) this.angle += 0.1;
+                
+                this.thrusting = keys['w'] || keys['ArrowUp'];
+                if(this.thrusting) {
+                    this.vel.x += Math.cos(this.angle) * 0.2;
+                    this.vel.y += Math.sin(this.angle) * 0.2;
+                    // Thrust particles
+                    if(Math.random()<0.5) particles.push(new Particle(this.x - Math.cos(this.angle)*this.radius, this.y - Math.sin(this.angle)*this.radius, '#F97316'));
+                }
+                
+                this.vel.x *= 0.99; this.vel.y *= 0.99; // friction
+                this.x += this.vel.x; this.y += this.vel.y;
+                
+                // Screen wrap
+                if(this.x < 0) this.x = width; if(this.x > width) this.x = 0;
+                if(this.y < 0) this.y = height; if(this.y > height) this.y = 0;
+            }
+            draw() {
+                if(this.invuln > 0 && Math.floor(Date.now()/100)%2===0) return; // Blink
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.angle);
+                ctx.strokeStyle = '#06B6D4';
+                ctx.shadowBlur = 15; ctx.shadowColor = '#06B6D4';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(this.radius, 0);
+                ctx.lineTo(-this.radius, this.radius*0.7);
+                ctx.lineTo(-this.radius*0.5, 0);
+                ctx.lineTo(-this.radius, -this.radius*0.7);
+                ctx.closePath();
+                ctx.stroke();
+                
+                if(this.thrusting) {
+                    ctx.beginPath();
+                    ctx.moveTo(-this.radius*0.6, 0);
+                    ctx.lineTo(-this.radius*1.5, 0);
+                    ctx.strokeStyle = '#F97316';
+                    ctx.stroke();
+                }
+                ctx.restore();
+            }
+        }
+
+        class Bullet {
+            constructor(x, y, angle) {
+                this.x = x; this.y = y;
+                this.vel = {x: Math.cos(angle)*10, y: Math.sin(angle)*10};
+                this.life = 60; // frames
+            }
+            update() {
+                this.x += this.vel.x; this.y += this.vel.y;
+                this.life--;
+            }
+            draw() {
+                ctx.fillStyle = '#fff';
+                ctx.shadowBlur = 10; ctx.shadowColor = '#fff';
+                ctx.beginPath(); ctx.arc(this.x, this.y, 2, 0, Math.PI*2); ctx.fill();
+                ctx.shadowBlur = 0;
+            }
+        }
+
+        class Asteroid {
+            constructor(x, y, r) {
+                this.x = x || Math.random()*width;
+                this.y = y || Math.random()*height;
+                // keep away from center player at spawn
+                if(!x && !y) {
+                    while(Math.hypot(this.x - width/2, this.y - height/2) < 150) {
+                        this.x = Math.random()*width; this.y = Math.random()*height;
+                    }
+                }
+                this.radius = r || 40;
+                let speed = 50 / this.radius;
+                let angle = Math.random() * Math.PI*2;
+                this.vel = {x: Math.cos(angle)*speed, y: Math.sin(angle)*speed};
+                this.verts = Math.floor(Math.random()*5 + 5);
+                this.offsets = Array.from({length:this.verts}, ()=> Math.random()*0.4 + 0.8);
+            }
+            update() {
+                this.x += this.vel.x; this.y += this.vel.y;
+                if(this.x < -this.radius) this.x = width+this.radius; if(this.x > width+this.radius) this.x = -this.radius;
+                if(this.y < -this.radius) this.y = height+this.radius; if(this.y > height+this.radius) this.y = -this.radius;
+            }
+            draw() {
+                ctx.strokeStyle = '#7C3AED';
+                ctx.shadowBlur = 10; ctx.shadowColor = '#7C3AED';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                for(let i=0; i<this.verts; i++) {
+                    let a = (i/this.verts)*Math.PI*2;
+                    let r = this.radius * this.offsets[i];
+                    let px = this.x + Math.cos(a)*r;
+                    let py = this.y + Math.sin(a)*r;
+                    if(i===0) ctx.moveTo(px,py); else ctx.lineTo(px,py);
+                }
+                ctx.closePath();
+                ctx.stroke();
+                ctx.shadowBlur = 0;
+            }
+        }
+
+        class Particle {
+            constructor(x, y, color) {
+                this.x = x; this.y = y; this.color = color || '#06B6D4';
+                let a = Math.random()*Math.PI*2;
+                let v = Math.random()*3;
+                this.vel = {x:Math.cos(a)*v, y:Math.sin(a)*v};
+                this.life = 1; this.decay = Math.random()*0.02 + 0.02;
+            }
+            update() {
+                this.x += this.vel.x; this.y += this.vel.y;
+                this.life -= this.decay;
+            }
+            draw() {
+                ctx.globalAlpha = this.life;
+                ctx.fillStyle = this.color;
+                ctx.beginPath(); ctx.arc(this.x, this.y, 2, 0, Math.PI*2); ctx.fill();
+                ctx.globalAlpha = 1;
+            }
+        }
+
+        function init() {
+            player = new Player();
+            bullets = []; asteroids = []; particles = [];
+            stars = Array.from({length:100}, ()=>({
+                x:Math.random()*width, y:Math.random()*height, s:Math.random()*2
+            }));
+            score = 0; lives = 3; isGameOver = false;
+            document.getElementById('score').innerText = score;
+            document.getElementById('lives').innerText = '❤️'.repeat(lives);
+            document.getElementById('game-over').classList.remove('show');
+            
+            for(let i=0; i<5; i++) asteroids.push(new Asteroid());
+        }
+
+        function breakAsteroid(a, i) {
+            score += Math.floor(1000/a.radius);
+            document.getElementById('score').innerText = score;
+            
+            // Explosion
+            for(let p=0; p<15; p++) particles.push(new Particle(a.x, a.y, '#7C3AED'));
+            
+            // Split
+            if(a.radius > 15) {
+                asteroids.push(new Asteroid(a.x, a.y, a.radius/2));
+                asteroids.push(new Asteroid(a.x, a.y, a.radius/2));
+            }
+            asteroids.splice(i, 1);
+            
+            // Respawn waves
+            if(asteroids.length === 0) {
+                for(let j=0; j<5 + Math.floor(score/1000); j++) asteroids.push(new Asteroid());
+            }
+        }
+
+        let lastShot = 0;
+        function loop() {
+            if(isGameOver) return;
+            requestAnimationFrame(loop);
+            
+            ctx.fillStyle = 'rgba(0,0,0,0.5)'; // trails
+            ctx.fillRect(0,0,width,height);
+            
+            // Stars
+            ctx.fillStyle = '#fff';
+            stars.forEach(s => { ctx.beginPath(); ctx.arc(s.x, s.y, s.s, 0, Math.PI*2); ctx.fill(); });
+            
+            // Shoot
+            if((keys[' '] || keys['Spacebar']) && Date.now() - lastShot > 150) {
+                bullets.push(new Bullet(player.x + Math.cos(player.angle)*player.radius, player.y + Math.sin(player.angle)*player.radius, player.angle));
+                lastShot = Date.now();
+            }
+
+            player.update();
+            player.draw();
+
+            // Bullets
+            for(let i=bullets.length-1; i>=0; i--) {
+                let b = bullets[i];
+                b.update(); b.draw();
+                if(b.life <= 0) bullets.splice(i,1);
+            }
+
+            // Asteroids
+            for(let i=asteroids.length-1; i>=0; i--) {
+                let a = asteroids[i];
+                a.update(); a.draw();
+                
+                // Bullet hit
+                for(let j=bullets.length-1; j>=0; j--) {
+                    let b = bullets[j];
+                    if(Math.hypot(a.x-b.x, a.y-b.y) < a.radius) {
+                        breakAsteroid(a, i);
+                        bullets.splice(j, 1);
+                        break;
+                    }
+                }
+                
+                // Player hit
+                if(player.invuln <= 0 && Math.hypot(a.x-player.x, a.y-player.y) < a.radius + player.radius) {
+                    for(let p=0; p<30; p++) particles.push(new Particle(player.x, player.y, '#ef4444'));
+                    lives--;
+                    document.getElementById('lives').innerText = '❤️'.repeat(lives);
+                    if(lives <= 0) {
+                        isGameOver = true;
+                        document.getElementById('final-score').innerText = score;
+                        document.getElementById('game-over').classList.add('show');
+                    } else {
+                        player = new Player(); // Reset pos, invuln
+                    }
+                }
+            }
+
+            // Particles
+            for(let i=particles.length-1; i>=0; i--) {
+                p = particles[i]; p.update(); p.draw();
+                if(p.life <= 0) particles.splice(i,1);
+            }
+        }
+
+        window.addEventListener('keydown', e => keys[e.key] = true);
+        window.addEventListener('keyup', e => keys[e.key] = false);
+
+        resize();
+        loop();
+    </script>
+</body>
+</html>

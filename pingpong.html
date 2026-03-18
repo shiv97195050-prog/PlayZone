@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ping Pong Duel</title>
+    <style>
+        body { margin:0; overflow:hidden; display:flex; justify-content:center; align-items:center; height:100vh; background:#000; font-family:'Fredoka',sans-serif; color:white; }
+        canvas { background:#111; border:4px solid #fff; border-radius:10px; box-shadow:0 0 20px rgba(255,255,255,0.2); }
+        
+        #ui { position:absolute; top:20px; left:50%; transform:translateX(-50%); display:flex; gap:50px; z-index:10; pointer-events:none; }
+        .score { font-size:4rem; font-weight:bold; width:100px; text-align:center; }
+        #p1-score { color:#38bdf8; text-shadow:0 0 15px #0284c7; }
+        #p2-score { color:#ef4444; text-shadow:0 0 15px #b91c1c; }
+        
+        #menu { position:absolute; inset:0; background:rgba(0,0,0,0.9); display:flex; flex-direction:column; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:0.3s; z-index:20; }
+        #menu.show { opacity:1; pointer-events:all; }
+        h1 { font-size:5rem; color:#fff; text-shadow:0 0 20px #fff; margin:0 0 40px; text-transform:uppercase; letter-spacing:5px;}
+        .mode-btn { background:transparent; border:2px solid #fff; color:#fff; padding:15px 40px; font-size:1.5rem; font-family:inherit; cursor:pointer; margin:10px; border-radius:30px; transition:0.2s; text-transform:uppercase; font-weight:bold;}
+        .mode-btn:hover { background:#fff; color:#000; box-shadow:0 0 20px #fff; transform:scale(1.05); }
+
+        #game-over { position:absolute; inset:0; background:rgba(0,0,0,0.9); display:flex; flex-direction:column; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:0.3s; z-index:30; }
+        #game-over.show { opacity:1; pointer-events:all; }
+        h2 { font-size:4rem; margin:0 0 30px; text-transform:uppercase;}
+
+    </style>
+</head>
+<body>
+
+    <div id="ui">
+        <div class="score" id="p1-score">0</div>
+        <div class="score" style="color:#555;">:</div>
+        <div class="score" id="p2-score">0</div>
+    </div>
+
+    <div id="menu" class="show">
+        <h1>NEON PONG</h1>
+        <button class="mode-btn" onclick="startGame('cpu')">1 Player (VS CPU)</button>
+        <button class="mode-btn" onclick="startGame('pvp')">2 Players</button>
+        <p style="color:#888; margin-top:30px;">P1: W/S or Touch Left | P2: UP/DOWN or Touch Right</p>
+    </div>
+
+    <div id="game-over">
+        <h2 id="winner-text">PLAYER 1 WINS</h2>
+        <button class="mode-btn" onclick="backToMenu()">Menu</button>
+    </div>
+
+    <canvas id="gameCanvas" width="800" height="500"></canvas>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const w = canvas.width; const h = canvas.height;
+
+        let p1Score = 0, p2Score = 0;
+        const WIN_SCORE = 5;
+        let mode = 'cpu'; // cpu or pvp
+        let isPlaying = false;
+        let keys = {};
+
+        const paddleW = 15, paddleH = 100, paddleSpeed = 8;
+        const ballSize = 10;
+        let maxSpeed = 15;
+
+        class Paddle {
+            constructor(x, color, isP2=false) {
+                this.x = x; this.y = h/2 - paddleH/2;
+                this.w = paddleW; this.h = paddleH;
+                this.color = color;
+                this.isP2 = isP2;
+                this.power = 0; // for power hits
+            }
+            update(ball) {
+                if(mode === 'cpu' && this.isP2) {
+                    // Primitive AI
+                    let dest = ball.y - this.h/2;
+                    let error = (Math.random()-0.5) * 50; // makes mistakes
+                    if(ball.dx > 0) {
+                        if(this.y < dest + error) this.y += Math.min(paddleSpeed*0.8, dest - this.y);
+                        else if(this.y > dest + error) this.y -= Math.min(paddleSpeed*0.8, this.y - dest);
+                    } else { // Return to center
+                        let center = h/2 - this.h/2;
+                        if(this.y < center) this.y += paddleSpeed*0.5;
+                        if(this.y > center) this.y -= paddleSpeed*0.5;
+                    }
+                } else {
+                    // Player Controls
+                    if(!this.isP2) {
+                        if(keys['w'] || keys['W']) this.y -= paddleSpeed;
+                        if(keys['s'] || keys['S']) this.y += paddleSpeed;
+                    } else {
+                        if(keys['ArrowUp']) this.y -= paddleSpeed;
+                        if(keys['ArrowDown']) this.y += paddleSpeed;
+                    }
+                }
+
+                if(this.y < 0) this.y = 0;
+                if(this.y+this.h > h) this.y = h-this.h;
+            }
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.shadowBlur = 15; ctx.shadowColor = this.color;
+                ctx.beginPath(); ctx.roundRect(this.x, this.y, this.w, this.h, 5); ctx.fill();
+                ctx.shadowBlur = 0;
+            }
+        }
+
+        class Ball {
+            constructor() {
+                this.reset();
+            }
+            reset() {
+                this.x = w/2; this.y = h/2;
+                this.r = ballSize;
+                let dir = Math.random() > 0.5 ? 1 : -1;
+                this.dx = 5 * dir;
+                this.dy = (Math.random() - 0.5) * 6;
+                this.speed = Math.hypot(this.dx, this.dy);
+                this.trail = [];
+                this.lastHitColor = '#fff';
+            }
+            update(p1, p2) {
+                this.trail.unshift({x:this.x, y:this.y});
+                if(this.trail.length > 8) this.trail.pop();
+
+                this.x += this.dx; this.y += this.dy;
+
+                // Walls
+                if(this.y - this.r < 0 || this.y + this.r > h) {
+                    this.dy = -this.dy;
+                    createSparks(this.x, this.dy>0?this.r:h-this.r, '#fff');
+                }
+
+                // Score
+                if(this.x < 0) { p2Score++; updateUI(); checkWin(); this.reset(); this.dx = 5; } // serv left
+                if(this.x > w) { p1Score++; updateUI(); checkWin(); this.reset(); this.dx = -5; } // serv right
+
+                // Paddle Collision
+                let p = this.dx < 0 ? p1 : p2;
+                
+                // Hitbox check
+                if(this.x - this.r < p.x + p.w && this.x + this.r > p.x && this.y + this.r > p.y && this.y - this.r < p.y + p.h) {
+                    // Check if actually hitting from front, not getting stuck behind
+                    if( (this.dx < 0 && this.x > p.x + p.w/2) || (this.dx > 0 && this.x < p.x + p.w/2) ) {
+                        // Calc angle based on intersection point
+                        let collidePoint = (this.y - (p.y + p.h/2));
+                        collidePoint = collidePoint / (p.h/2); // -1 to 1
+                        let angle = collidePoint * (Math.PI/4); // max 45 deg
+                        
+                        let dir = this.x < w/2 ? 1 : -1;
+                        this.speed = Math.min(maxSpeed, this.speed + 0.5); // speed up
+                        
+                        this.dx = dir * this.speed * Math.cos(angle);
+                        this.dy = this.speed * Math.sin(angle);
+                        
+                        this.lastHitColor = p.color;
+                        createSparks(this.x, this.y, p.color);
+                    }
+                }
+            }
+            draw() {
+                // Trail
+                for(let i=0; i<this.trail.length; i++) {
+                    let t = this.trail[i];
+                    ctx.fillStyle = this.lastHitColor;
+                    ctx.globalAlpha = 1 - (i/this.trail.length);
+                    ctx.beginPath(); ctx.arc(t.x, t.y, this.r * (1 - i*0.1), 0, Math.PI*2); ctx.fill();
+                }
+                ctx.globalAlpha = 1;
+
+                ctx.fillStyle = '#fff';
+                ctx.shadowBlur = 10; ctx.shadowColor = this.lastHitColor;
+                ctx.beginPath(); ctx.arc(this.x, this.y, this.r, 0, Math.PI*2); ctx.fill();
+                ctx.shadowBlur = 0;
+            }
+        }
+
+        let p1, p2, ball, sparks = [];
+        
+        function createSparks(x, y, color) {
+            for(let i=0; i<10; i++) {
+                sparks.push({x:x,y:y, c:color, vx:(Math.random()-0.5)*10, vy:(Math.random()-0.5)*10, life:1});
+            }
+        }
+
+        function startGame(selectedMode) {
+            mode = selectedMode;
+            p1Score = 0; p2Score = 0; updateUI();
+            p1 = new Paddle(20, '#38bdf8');
+            p2 = new Paddle(w - 20 - paddleW, '#ef4444', true);
+            ball = new Ball();
+            sparks = [];
+            isPlaying = true;
+            document.getElementById('menu').classList.remove('show');
+            document.getElementById('game-over').classList.remove('show');
+            loop();
+        }
+
+        function backToMenu() {
+            document.getElementById('game-over').classList.remove('show');
+            document.getElementById('menu').classList.add('show');
+            isPlaying = false;
+        }
+
+        function updateUI() {
+            document.getElementById('p1-score').innerText = p1Score;
+            document.getElementById('p2-score').innerText = p2Score;
+        }
+
+        function checkWin() {
+            if(p1Score >= WIN_SCORE || p2Score >= WIN_SCORE) {
+                isPlaying = false;
+                let txt = document.getElementById('winner-text');
+                if(p1Score >= WIN_SCORE) { txt.innerText = 'PLAYER 1 WINS!'; txt.style.color = '#38bdf8'; }
+                else { txt.innerText = mode==='cpu'?'CPU WINS!':'PLAYER 2 WINS!'; txt.style.color = '#ef4444'; }
+                setTimeout(()=>document.getElementById('game-over').classList.add('show'), 500);
+            }
+        }
+
+        function loop() {
+            if(!isPlaying) return;
+            requestAnimationFrame(loop);
+            
+            ctx.clearRect(0,0,w,h);
+            
+            // Net
+            ctx.strokeStyle = 'rgba(255,255,255,0.1)'; ctx.lineWidth = 4; ctx.setLineDash([15, 15]);
+            ctx.beginPath(); ctx.moveTo(w/2, 0); ctx.lineTo(w/2, h); ctx.stroke(); ctx.setLineDash([]);
+
+            p1.update(ball); p1.draw();
+            p2.update(ball); p2.draw();
+            ball.update(p1, p2); ball.draw();
+
+            // Sparks
+            for(let i=sparks.length-1; i>=0; i--) {
+                let s = sparks[i]; s.x += s.vx; s.y += s.vy; s.life -= 0.05;
+                if(s.life>0) {
+                    ctx.globalAlpha=s.life; ctx.fillStyle=s.c; ctx.beginPath(); ctx.arc(s.x,s.y,3,0,Math.PI*2); ctx.fill(); ctx.globalAlpha=1;
+                } else sparks.splice(i,1);
+            }
+        }
+
+        window.addEventListener('keydown', e => keys[e.key] = true);
+        window.addEventListener('keyup', e => keys[e.key] = false);
+
+        // Touch controls
+        canvas.addEventListener('touchstart', handleTouch, {passive:false});
+        canvas.addEventListener('touchmove', handleTouch, {passive:false});
+        function handleTouch(e) {
+            e.preventDefault();
+            for(let i=0; i<e.touches.length; i++) {
+                let t = e.touches[i];
+                let rect = canvas.getBoundingClientRect();
+                let ty = t.clientY - rect.top;
+                let tx = t.clientX - rect.left;
+                
+                if(tx < w/2) p1.y = ty - p1.h/2;
+                else if(mode==='pvp' && tx > w/2) p2.y = ty - p2.h/2;
+            }
+        }
+
+    </script>
+</body>
+</html>

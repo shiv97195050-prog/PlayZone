@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Car Dodge</title>
+    <style>
+        body { margin:0; padding:0; overflow:hidden; background:#111; font-family:'Nunito', sans-serif; color:white; }
+        canvas { display:block; width:100vw; height:100vh; background:linear-gradient(to top, #1E293B, #0F172A); }
+        #ui { position:absolute; top:20px; left:20px; right:20px; display:flex; justify-content:space-between; z-index:10; pointer-events:none; }
+        .score-box { background:rgba(0,0,0,0.8); padding:10px 20px; border-radius:10px; font-size:1.5rem; font-weight:bold; border:2px solid; color:#E2E8F0; }
+        #score-val { color:#38BDF8; text-shadow:0 0 10px #38BDF8; }
+        #speed-val { color:#F43F5E; text-shadow:0 0 10px #F43F5E; }
+        
+        #game-over { position:absolute; inset:0; background:rgba(0,0,0,0.9); display:flex; flex-direction:column; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:0.3s; z-index:20; }
+        #game-over.show { opacity:1; pointer-events:all; }
+        h1 { font-size:4rem; color:#F43F5E; margin:0 0 10px; text-shadow: 0 5px 0 #9F1239, 0 10px 20px rgba(244,63,94,0.5); text-transform:uppercase; font-family:'Fredoka', sans-serif; }
+        .stats { font-size:1.5rem; color:#94A3B8; margin:5px 0; }
+        .val { color:#fff; font-size:2rem; font-weight:bold; }
+        button { margin-top:30px; padding:15px 40px; background:#38BDF8; color:#0F172A; font-weight:bold; font-size:1.5rem; border:none; border-radius:30px; cursor:pointer; box-shadow:0 10px 0 #0284C7; transition:0.1s; text-transform:uppercase; }
+        button:active { transform:translateY(10px); box-shadow:none; }
+
+        .bonus-text { position:absolute; font-size:2rem; font-weight:bold; color:#FBBF24; text-shadow:0 0 10px #FBBF24; pointer-events:none; animation:floatUp 1s forwards; opacity:0; z-index:15; }
+        @keyframes floatUp { 0% { transform:translateY(0) scale(1); opacity:1; } 100% { transform:translateY(-50px) scale(1.5); opacity:0; } }
+
+        .controls-hint { position:absolute; bottom:5%; width:100%; text-align:center; color:rgba(255,255,255,0.5); font-size:1.2rem; pointer-events:none; }
+    </style>
+</head>
+<body>
+
+    <div id="ui">
+        <div class="score-box" style="border-color:#0284C7">SCORE <span id="score-val">0</span></div>
+        <div class="score-box" style="border-color:#BE123C"><span id="speed-val">100</span> MPH</div>
+    </div>
+
+    <div class="controls-hint">Use ⬅️ ➡️ Arrows to Steer</div>
+
+    <div id="game-over">
+        <h1>CRASHED</h1>
+        <div class="stats">SCORE: <span class="val" id="final-score">0</span></div>
+        <div class="stats">BEST: <span class="val" id="best-score">0</span></div>
+        <button onclick="init()">Race Again</button>
+    </div>
+
+    <canvas id="gameCanvas"></canvas>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        let w = canvas.width = window.innerWidth;
+        let h = canvas.height = window.innerHeight;
+        window.addEventListener('resize', () => { w = canvas.width = window.innerWidth; h = canvas.height = window.innerHeight; road.x = w/2; });
+
+        let lanes = 3;
+        let laneW = Math.min(w / (lanes + 1), 150);
+        let roadW = laneW * lanes;
+        let lastTime = 0;
+        let isGameOver = false;
+
+        let score = 0;
+        let bestScore = localStorage.getItem('cardodgeBest') || 0;
+        let speedMultiplier = 1;
+        let baseSpeed = 10;
+        
+        let road = { y: 0, speed: baseSpeed };
+        let player, traffic, particles;
+
+        class Car {
+            constructor(lane, isPlayer=false) {
+                this.lane = lane;
+                this.x = (w - roadW)/2 + (lane + 0.5) * laneW;
+                this.y = isPlayer ? h - 150 : -100;
+                this.w = laneW * 0.6;
+                this.h = this.w * 2;
+                this.isPlayer = isPlayer;
+                this.color = isPlayer ? '#38BDF8' : ['#F43F5E', '#FBBF24', '#A3E635', '#C084FC'][Math.floor(Math.random()*4)];
+                this.speed = isPlayer ? 0 : Math.random() * 5 + 3; // traffic speed
+                this.passed = false;
+            }
+            update() {
+                // Smooth lane changing for player
+                let targetX = (w - roadW)/2 + (this.lane + 0.5) * laneW;
+                this.x += (targetX - this.x) * 0.2;
+
+                if(!this.isPlayer) {
+                    this.y += (road.speed * speedMultiplier) - this.speed;
+                }
+            }
+            draw() {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+
+                // Shadow
+                ctx.fillStyle = 'rgba(0,0,0,0.5)';
+                ctx.fillRect(-this.w/2 + 5, -this.h/2 + 5, this.w, this.h);
+
+                // Body outline
+                ctx.fillStyle = '#222';
+                ctx.beginPath(); ctx.roundRect(-this.w/2, -this.h/2, this.w, this.h, 10); ctx.fill();
+
+                // Main body
+                ctx.fillStyle = this.color;
+                ctx.beginPath(); ctx.roundRect(-this.w/2+2, -this.h/2+2, this.w-4, this.h-4, 8); ctx.fill();
+
+                // Roof/Windows
+                ctx.fillStyle = '#111';
+                ctx.beginPath(); ctx.roundRect(-this.w/2+5, -this.h/4, this.w-10, this.h/2, 5); ctx.fill();
+                
+                // Headlights
+                if(this.isPlayer) {
+                    ctx.fillStyle = 'rgba(255, 255, 100, 0.8)';
+                    ctx.beginPath(); ctx.arc(-this.w/2+6, -this.h/2+5, 4, 0, Math.PI*2); ctx.fill();
+                    ctx.beginPath(); ctx.arc(this.w/2-6, -this.h/2+5, 4, 0, Math.PI*2); ctx.fill();
+                    // Beams
+                    let gradLeft = ctx.createLinearGradient(-this.w/2+6, -this.h/2, -this.w/2-10, -Math.max(h,this.y));
+                    gradLeft.addColorStop(0, 'rgba(255,255,100,0.4)'); gradLeft.addColorStop(1, 'rgba(255,255,100,0)');
+                    ctx.fillStyle = gradLeft;
+                    ctx.beginPath(); ctx.moveTo(-this.w/2+2, -this.h/2); ctx.lineTo(-this.w/2-20, -h); ctx.lineTo(-this.w/2+20, -h); ctx.fill();
+                    
+                    let gradRight = ctx.createLinearGradient(this.w/2-6, -this.h/2, this.w/2+10, -Math.max(h,this.y));
+                    gradRight.addColorStop(0, 'rgba(255,255,100,0.4)'); gradRight.addColorStop(1, 'rgba(255,255,100,0)');
+                    ctx.fillStyle = gradRight;
+                    ctx.beginPath(); ctx.moveTo(this.w/2-2, -this.h/2); ctx.lineTo(this.w/2-20, -h); ctx.lineTo(this.w/2+20, -h); ctx.fill();
+                } else {
+                    // Taillights
+                    ctx.fillStyle = '#ef4444';
+                    ctx.fillRect(-this.w/2+4, this.h/2-4, 8, 4);
+                    ctx.fillRect(this.w/2-12, this.h/2-4, 8, 4);
+                }
+
+                ctx.restore();
+            }
+        }
+
+        class Particle {
+            constructor(x,y,color, speed) {
+                this.x=x; this.y=y; this.color=color;
+                let angle = Math.random()*Math.PI*2;
+                this.vx = Math.cos(angle)*(speed||5);
+                this.vy = Math.sin(angle)*(speed||5);
+                this.life = 1; this.decay = Math.random()*0.02 + 0.02;
+            }
+            update() { this.x+=this.vx; this.y+=this.vy; this.life-=this.decay;}
+            draw() {
+                if(this.life<=0) return;
+                ctx.globalAlpha = Math.max(0,this.life); ctx.fillStyle=this.color;
+                ctx.beginPath(); ctx.arc(this.x,this.y,3,0,Math.PI*2); ctx.fill();
+                ctx.globalAlpha = 1;
+            }
+        }
+
+        function createBonusText(x, y, text) {
+            let el = document.createElement('div');
+            el.className = 'bonus-text';
+            el.innerText = text;
+            el.style.left = x + 'px';
+            el.style.top = y + 'px';
+            document.body.appendChild(el);
+            setTimeout(()=>el.remove(), 1000);
+        }
+
+        function spawnTraffic() {
+            // Need a gap check
+            let canSpawn = true;
+            if(traffic.length > 0) {
+                let last = traffic[traffic.length-1];
+                if(last.y < last.h * 2) canSpawn = false;
+            }
+
+            if(canSpawn && Math.random() < 0.05 * speedMultiplier) {
+                let l = Math.floor(Math.random() * lanes);
+                traffic.push(new Car(l));
+                
+                // Maybe spawn 2 if speed is high enough
+                if(speedMultiplier > 1.5 && Math.random() < 0.3) {
+                    let l2 = Math.floor(Math.random() * lanes);
+                    if(l2 !== l) traffic.push(new Car(l2));
+                }
+            }
+        }
+
+        function init() {
+            laneW = Math.min(w / (lanes + 1), 150);
+            roadW = laneW * lanes;
+            player = new Car(Math.floor(lanes/2), true);
+            traffic = []; particles = [];
+            score = 0; speedMultiplier = 1;
+            isGameOver = false;
+            document.getElementById('game-over').classList.remove('show');
+            document.getElementById('score-val').innerText = score;
+            document.getElementById('speed-val').innerText = Math.floor(baseSpeed * 10);
+            lastTime = performance.now();
+            requestAnimationFrame(loop);
+        }
+
+        function drawRoad() {
+            let leftEdge = (w - roadW)/2;
+            
+            // Shoulders
+            ctx.fillStyle = '#1e293b';
+            ctx.fillRect(leftEdge - 20, 0, 20, h);
+            ctx.fillRect(leftEdge + roadW, 0, 20, h);
+            
+            // Rumble strips
+            ctx.fillStyle = '#ef4444';
+            let stripH = 40;
+            let offset = road.y % (stripH*2);
+            for(let y = -stripH*2 + offset; y < h; y += stripH*2) {
+                ctx.fillRect(leftEdge - 15, y, 15, stripH);
+                ctx.fillRect(leftEdge + roadW, y, 15, stripH);
+            }
+            
+            // Road surface
+            ctx.fillStyle = '#334155';
+            ctx.fillRect(leftEdge, 0, roadW, h);
+
+            // Lane Dividers
+            ctx.fillStyle = '#fff';
+            let dashH = 50, dashGap = 50;
+            let dashOffset = road.y % (dashH + dashGap);
+            for(let i=1; i<lanes; i++) {
+                let x = leftEdge + i * laneW;
+                for(let y = -dashH - dashGap + dashOffset; y < h; y += dashH + dashGap) {
+                    ctx.fillRect(x - 2, y, 4, dashH);
+                }
+            }
+        }
+
+        function checkCollisions() {
+            let hitW = player.w * 0.8;
+            let hitH = player.h * 0.8;
+            
+            for(let t of traffic) {
+                // Collision Box
+                if(Math.abs(t.x - player.x) < hitW && Math.abs(t.y - player.y) < hitH) {
+                    // Crash
+                    isGameOver = true;
+                    // Explosion
+                    for(let i=0; i<30; i++) particles.push(new Particle(player.x, player.y, ['#F43F5E', '#FBBF24', '#fff'][Math.floor(Math.random()*3)], 10));
+                    
+                    if(score > bestScore) {
+                        bestScore = Math.floor(score);
+                        localStorage.setItem('cardodgeBest', bestScore);
+                    }
+                    document.getElementById('final-score').innerText = Math.floor(score);
+                    document.getElementById('best-score').innerText = bestScore;
+                    setTimeout(() => document.getElementById('game-over').classList.add('show'), 1000);
+                    return;
+                }
+                
+                // Near Miss Bonus
+                if(!t.passed && t.y > player.y + player.h/2) {
+                    t.passed = true;
+                    // Check horizontal distance
+                    let dist = Math.abs(t.x - player.x);
+                    if(dist < laneW && dist > player.w) { // close but not hit
+                        score += 50;
+                        createBonusText(player.x, player.y - player.h, "+50 NEAR MISS!");
+                        // Sparks
+                        for(let i=0; i<10; i++) particles.push(new Particle((t.x+player.x)/2, player.y, '#FBBF24', 3));
+                    }
+                }
+            }
+        }
+
+        function loop(time) {
+            if(isGameOver) {
+                // Keep drawing but static, plus particles
+                ctx.fillStyle = '#111'; ctx.fillRect(0,0,w,h);
+                drawRoad();
+                traffic.forEach(t => t.draw());
+                particles.forEach((p,i) => { p.update(); p.draw(); if(p.life<=0) particles.splice(i,1); });
+                ctx.save(); ctx.translate(player.x, player.y);
+                ctx.fillStyle = '#000'; ctx.fillRect(-player.w/2, -player.h/2, player.w, player.h); // burnt out husk
+                ctx.restore();
+                return;
+            }
+            
+            let dt = (time - lastTime)/16;
+            lastTime = time;
+
+            ctx.clearRect(0,0,w,h);
+
+            // Update road
+            road.y += baseSpeed * speedMultiplier;
+            drawRoad();
+
+            // Score and Speed increasing
+            score += 0.1 * speedMultiplier;
+            speedMultiplier = Math.min(3, 1 + (score / 1000));
+            
+            document.getElementById('score-val').innerText = Math.floor(score);
+            document.getElementById('speed-val').innerText = Math.floor(baseSpeed * speedMultiplier * 10);
+
+            // Exhaust Player
+            if(Math.random()<0.3) particles.push(new Particle(player.x - 10, player.y + player.h/2, '#cbd5e1', 1));
+            if(Math.random()<0.3) particles.push(new Particle(player.x + 10, player.y + player.h/2, '#cbd5e1', 1));
+
+            player.update();
+            player.draw();
+
+            spawnTraffic();
+            
+            for(let i=traffic.length-1; i>=0; i--) {
+                let t = traffic[i];
+                t.update();
+                t.draw();
+                if(t.y > h + t.h) traffic.splice(i,1);
+            }
+
+            particles.forEach((p,i) => { p.update(); p.draw(); if(p.life<=0) particles.splice(i,1); });
+
+            checkCollisions();
+
+            requestAnimationFrame(loop);
+        }
+
+        window.addEventListener('keydown', e => {
+            if(['ArrowLeft', 'a', 'A'].includes(e.key) && player.lane > 0) player.lane--;
+            if(['ArrowRight', 'd', 'D'].includes(e.key) && player.lane < lanes-1) player.lane++;
+        });
+
+        // Touch Control - Tap left/right side of screen
+        canvas.addEventListener('touchstart', e => {
+            let tx = e.touches[0].clientX;
+            if(tx < w/2 && player.lane > 0) player.lane--;
+            else if(tx > w/2 && player.lane < lanes-1) player.lane++;
+        }, {passive:true});
+
+        init();
+    </script>
+</body>
+</html>
