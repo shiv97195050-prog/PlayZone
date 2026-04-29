@@ -904,15 +904,27 @@
         <div class="game-player-container">
             <a class="back-btn" onclick="showHome(event)">⬅️ Back to Home</a>
 
-            <div class="iframe-wrapper" id="game-container">
+            <div class="iframe-wrapper" id="game-container" style="position: relative;">
                 <!-- Iframe or Coming Soon -->
             </div>
+            
+            <div style="margin-top: 1rem; display: flex; justify-content: flex-end;">
+                <button class="modal-icon-btn" onclick="toggleMainFullscreen()" style="background: var(--accent-purple); padding: 0.6rem 1.5rem; font-weight: 700; display: flex; align-items: center; gap: 0.5rem; border-radius: 50px; box-shadow: var(--neon-glow-purple);">
+                    ⛶ Fullscreen
+                </button>
+            </div>
 
-            <div class="game-details">
-                <h1 id="playing-title">Game Title</h1>
-                <p id="playing-meta"></p>
-                <div style="margin-top: 1.5rem;" id="playing-desc">
-                    Get ready for an epic gaming experience! This premium title is part of our PlayZone collection.
+            <div class="game-details" style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 2rem;">
+                <div style="flex: 1; min-width: 300px;">
+                    <h1 id="playing-title">Game Title</h1>
+                    <p id="playing-meta"></p>
+                    <div style="margin-top: 1.5rem;" id="playing-desc">
+                        Get ready for an epic gaming experience! This premium title is part of our PlayZone collection.
+                    </div>
+                </div>
+                <div id="game-controls-box" style="background: var(--card-bg); padding: 1.5rem; border-radius: 15px; border: 1px solid var(--accent-purple); box-shadow: var(--neon-glow-purple); min-width: 250px;">
+                    <h3 style="color: var(--accent-cyan); margin-bottom: 0.8rem; display: flex; align-items: center; gap: 0.5rem;">🎮 Controls</h3>
+                    <div id="playing-controls" style="font-weight: 600; font-size: 1.1rem; color: var(--text-main);"></div>
                 </div>
             </div>
 
@@ -1035,12 +1047,26 @@
             { id: 4, title: 'Blockpost', genre: 'Shooter', rating: 4.7, plays: '3.1M', playsNum: 3100000, themeColor: '#2563EB', emoji: '🧱', badge: 'NEW', badgeClass: 'badge-new', difficulty: 'Hard', controls: 'WASD & Mouse', iframeSrc: 'https://games.gdevelop-app.com/game-f3b0/' },
             { id: 5, title: 'Stickman Hook', genre: 'Physics', rating: 4.9, plays: '5.2M', playsNum: 5200000, themeColor: '#7C3AED', emoji: '🪝', badge: 'GOLD', badgeClass: 'badge-gold', difficulty: 'Medium', controls: 'Hold to swing', iframeSrc: 'https://games.gdevelop-app.com/game-a1b2/' },
             { id: 6, title: 'Bullet Force', genre: 'Shooter', rating: 4.8, plays: '4.1M', playsNum: 4100000, themeColor: '#DC2626', emoji: '🎯', badge: 'HOT', badgeClass: 'badge-hot', difficulty: 'Hard', controls: 'Standard FPS', iframeSrc: 'https://games.gdevelop-app.com/game-d4e5/' },
-            { id: 7, title: 'Madalin Stunt Cars', genre: 'Racing', rating: 4.6, plays: '2.8M', playsNum: 2800000, themeColor: '#F59E0B', emoji: '🏎️', badge: 'EPIC', badgeClass: 'badge-epic', difficulty: 'Medium', controls: 'Arrows to drive', iframeSrc: 'https://games.gdevelop-app.com/game-e6f7/' },
+            { id: 7, title: 'Madalin Stunt Cars 2', genre: 'Racing', rating: 4.6, plays: '2.8M', playsNum: 2800000, themeColor: '#F59E0B', emoji: '🏎️', badge: 'EPIC', badgeClass: 'badge-epic', difficulty: 'Medium', controls: 'Arrows to drive', iframeSrc: 'https://games.gdevelop-app.com/game-e6f7/' },
             { id: 8, title: 'Shell Shockers', genre: 'Multiplayer', rating: 4.7, plays: '6.3M', playsNum: 6300000, themeColor: '#D97706', emoji: '🥚', badge: 'GOLD', badgeClass: 'badge-gold', difficulty: 'Hard', controls: 'WASD, Click to shoot', iframeSrc: 'https://games.gdevelop-app.com/game-g8h9/' },
             { id: 9, title: 'Vex 7', genre: 'Platformer', rating: 4.9, plays: '1.9M', playsNum: 1900000, themeColor: '#2563EB', emoji: '🏃', badge: 'NEW', badgeClass: 'badge-new', difficulty: 'Hard', controls: 'Arrows / WASD', iframeSrc: 'https://games.gdevelop-app.com/game-i0j1/' },
             { id: 10, title: 'Subway Surfers', genre: 'Skill', rating: 4.8, plays: '15M', playsNum: 15000000, themeColor: '#F97316', emoji: '🛹', badge: 'HOT', badgeClass: 'badge-hot', difficulty: 'Medium', controls: 'Arrows to dodge', iframeSrc: 'https://games.gdevelop-app.com/game-k2l3/' },
             { id: 11, title: 'Moto X3M', genre: 'Racing', rating: 4.9, plays: '8.4M', playsNum: 8400000, themeColor: '#EF4444', emoji: '🏍️', badge: 'GOLD', badgeClass: 'badge-gold', difficulty: 'Medium', controls: 'Arrows to balance', iframeSrc: 'https://games.gdevelop-app.com/game-m4n5/' },
-            { id: 12, title: 'Temple Run', genre: 'Skill', rating: 4.5, plays: '12M', playsNum: 12000000, themeColor: '#D97706', emoji: '🗿', badge: 'EPIC', badgeClass: 'badge-epic', difficulty: 'Medium', controls: 'Arrows to run', iframeSrc: 'https://games.gdevelop-app.com/game-o6p7/' }
+            { id: 12, title: 'Temple Run', genre: 'Skill', rating: 4.5, plays: '12M', playsNum: 12000000, themeColor: '#D97706', emoji: '🗿', badge: 'EPIC', badgeClass: 'badge-epic', difficulty: 'Medium', controls: 'Arrows to run', iframeSrc: 'https://games.gdevelop-app.com/game-o6p7/' },
+            { id: 13, title: 'Super Mario Rush', genre: 'Platformer', rating: 4.7, plays: '2.1M', playsNum: 2100000, themeColor: '#DC2626', emoji: '🍄', badge: 'FUN', badgeClass: 'badge-funny', difficulty: 'Easy', controls: 'Space to Jump', iframeSrc: 'https://games.gdevelop-app.com/game-q8r9/' },
+            { id: 14, title: 'Zombie Tsunami', genre: 'Action', rating: 4.6, plays: '3.5M', playsNum: 3500000, themeColor: '#16A34A', emoji: '🧟', badge: 'HOT', badgeClass: 'badge-hot', difficulty: 'Medium', controls: 'Click to Jump', iframeSrc: 'https://games.gdevelop-app.com/game-s0t1/' },
+            { id: 15, title: 'Crossy Road', genre: 'Casual', rating: 4.8, plays: '7.2M', playsNum: 7200000, themeColor: '#10B981', emoji: '🐔', badge: 'BEST', badgeClass: 'badge-gold', difficulty: 'Easy', controls: 'Arrows to Move', iframeSrc: 'https://games.gdevelop-app.com/game-u2v3/' },
+            { id: 16, title: 'Fruit Ninja Pro', genre: 'Skill', rating: 4.7, plays: '4.1M', playsNum: 4100000, themeColor: '#EF4444', emoji: '🍉', badge: 'NEW', badgeClass: 'badge-new', difficulty: 'Medium', controls: 'Mouse Slash', iframeSrc: 'https://games.gdevelop-app.com/game-w4x5/' },
+            { id: 17, title: 'Angry Birds', genre: 'Physics', rating: 4.5, plays: '9.3M', playsNum: 9300000, themeColor: '#DC2626', emoji: '🐦', badge: 'EPIC', badgeClass: 'badge-epic', difficulty: 'Medium', controls: 'Drag & Release', iframeSrc: 'https://games.gdevelop-app.com/game-y6z7/' },
+            { id: 18, title: 'Flappy Bird', genre: 'Skill', rating: 4.4, plays: '20M', playsNum: 20000000, themeColor: '#F59E0B', emoji: '🐤', badge: 'HARD', badgeClass: 'badge-hot', difficulty: 'Hard', controls: 'Click to Fly', iframeSrc: 'https://games.gdevelop-app.com/game-a8b9/' },
+            { id: 19, title: 'Pac-Man Neon', genre: 'Arcade', rating: 4.9, plays: '1.5M', playsNum: 1500000, themeColor: '#FBBF24', emoji: '🟡', badge: 'RETRO', badgeClass: 'badge-gold', difficulty: 'Medium', controls: 'Arrows to Move', iframeSrc: 'https://games.gdevelop-app.com/game-c0d1/' },
+            { id: 20, title: 'Space Invaders', genre: 'Shooter', rating: 4.6, plays: '800K', playsNum: 800000, themeColor: '#06B6D4', emoji: '👾', badge: 'NEW', badgeClass: 'badge-new', difficulty: 'Medium', controls: 'Arrows & Space', iframeSrc: 'https://games.gdevelop-app.com/game-e2f3/' },
+            { id: 21, title: 'Tetris 3D', genre: 'Puzzle', rating: 4.8, plays: '3.1M', playsNum: 3100000, themeColor: '#7C3AED', emoji: '🧱', badge: 'PRO', badgeClass: 'badge-epic', difficulty: 'Hard', controls: 'Arrows to Rotate', iframeSrc: 'https://games.gdevelop-app.com/game-g4h5/' },
+            { id: 22, title: 'Cut the Rope', genre: 'Physics', rating: 4.7, plays: '5.4M', playsNum: 5400000, themeColor: '#16A34A', emoji: '🍬', badge: 'FUN', badgeClass: 'badge-funny', difficulty: 'Medium', controls: 'Swipe to Cut', iframeSrc: 'https://games.gdevelop-app.com/game-i6j7/' },
+            { id: 23, title: 'Jetpack Joyride', genre: 'Action', rating: 4.8, plays: '6.2M', playsNum: 6200000, themeColor: '#F97316', emoji: '🚀', badge: 'HOT', badgeClass: 'badge-hot', difficulty: 'Medium', controls: 'Hold to Fly', iframeSrc: 'https://games.gdevelop-app.com/game-k8l9/' },
+            { id: 24, title: 'Doodle Jump', genre: 'Casual', rating: 4.6, plays: '4.8M', playsNum: 4800000, themeColor: '#84CC16', emoji: '🐸', badge: 'NEW', badgeClass: 'badge-new', difficulty: 'Easy', controls: 'Tilt / Arrows', iframeSrc: 'https://games.gdevelop-app.com/game-m0n1/' },
+            { id: 25, title: 'Among Us Lite', genre: 'Multiplayer', rating: 4.5, plays: '10M', playsNum: 10000000, themeColor: '#EF4444', emoji: '👨‍🚀', badge: 'GOLD', badgeClass: 'badge-gold', difficulty: 'Medium', controls: 'WASD & E', iframeSrc: 'https://games.gdevelop-app.com/game-o2p3/' },
+            { id: 26, title: 'Car Dodge', genre: 'Racing', rating: 4.8, plays: '2.5M', playsNum: 2500000, themeColor: '#F43F5E', emoji: '🏎️', badge: 'HOT', badgeClass: 'badge-hot', difficulty: 'Medium', controls: 'Left/Right Arrows', iframeSrc: 'games/cardodge.html' }
         ];
 
         
@@ -1255,7 +1281,14 @@
             iframe.setAttribute('allowfullscreen', 'true');
             iframe.setAttribute('frameborder', '0');
             iframe.setAttribute('scrolling', 'no');
-            iframe.onload = () => { spinner.style.display = 'none'; };
+            iframe.onload = () => { 
+                spinner.style.display = 'none'; 
+                iframe.focus();
+                // Send a message to the iframe to ensure it has focus
+                try {
+                    iframe.contentWindow.focus();
+                } catch(e) {}
+            };
             area.appendChild(iframe);
 
             modal.style.display = 'flex';
@@ -1322,18 +1355,18 @@
 
         // ===== MAIN SITE JS =====
         const GAMES_DATA = [
-            {id:1,title:'Snake Evolved',category:'Action',plays:'3.1M',src:'games/snake.html',color:'#10B981',icon:'🐍',trending:true},
-            {id:2,title:'Asteroid Blaster',category:'Action',plays:'2.1M',src:'games/asteroids.html',color:'#06B6D4',icon:'🚀',trending:true},
-            {id:3,title:'Brick Breaker Pro',category:'Action',plays:'1.5M',src:'games/brickbreaker.html',color:'#F59E0B',icon:'🧱',trending:false},
-            {id:4,title:'Zombie Survival',category:'Action',plays:'3.4M',src:'games/zombies.html',color:'#EF4444',icon:'🧟',trending:true},
-            {id:5,title:'2048 Remastered',category:'Puzzle',plays:'4.2M',src:'games/2048.html',color:'#7C3AED',icon:'🔢',trending:true},
-            {id:6,title:'Flappy Rocket',category:'Action',plays:'1.8M',src:'games/flappyrocket.html',color:'#FBBF24',icon:'🚀',trending:false},
-            {id:7,title:'Neon Tetris',category:'Puzzle',plays:'5.1M',src:'games/tetris.html',color:'#EC4899',icon:'🟦',trending:true},
-            {id:8,title:'Car Dodge',category:'Racing',plays:'2.5M',src:'games/cardodge.html',color:'#F43F5E',icon:'🏎️',trending:true},
-            {id:9,title:'Memory Match',category:'Puzzle',plays:'1.1M',src:'games/memory.html',color:'#8B5CF6',icon:'🧠',trending:false},
-            {id:10,title:'Fruit Slicer',category:'Action',plays:'4.1M',src:'games/fruitninja.html',color:'#EF4444',icon:'🍉',trending:true},
-            {id:11,title:'Tower Defense',category:'Action',plays:'1.2M',src:'games/towerdefense.html',color:'#3B82F6',icon:'🏰',trending:false},
-            {id:12,title:'Ping Pong Duel',category:'Sports',plays:'980K',src:'games/pingpong.html',color:'#E2E8F0',icon:'🏓',trending:false}
+            {id:1,title:'Snake Evolved',category:'Action',plays:'3.1M',src:'games/snake.html',color:'#10B981',icon:'🐍',trending:true, controls: 'Arrows to Move'},
+            {id:2,title:'Asteroid Blaster',category:'Action',plays:'2.1M',src:'games/asteroids.html',color:'#06B6D4',icon:'🚀',trending:true, controls: 'Arrows to Move, Space to Shoot'},
+            {id:3,title:'Brick Breaker Pro',category:'Action',plays:'1.5M',src:'games/brickbreaker.html',color:'#F59E0B',icon:'🧱',trending:false, controls: 'Mouse / Arrows to Move Paddle'},
+            {id:4,title:'Zombie Survival',category:'Action',plays:'3.4M',src:'games/zombies.html',color:'#EF4444',icon:'🧟',trending:true, controls: 'WASD to Move, Click to Aim & Shoot'},
+            {id:5,title:'2048 Remastered',category:'Puzzle',plays:'4.2M',src:'games/2048.html',color:'#7C3AED',icon:'🔢',trending:true, controls: 'Arrows to Slide Tiles'},
+            {id:6,title:'Flappy Rocket',category:'Action',plays:'1.8M',src:'games/flappyrocket.html',color:'#FBBF24',icon:'🚀',trending:false, controls: 'Space / Click to Fly'},
+            {id:7,title:'Neon Tetris',category:'Puzzle',plays:'5.1M',src:'games/tetris.html',color:'#EC4899',icon:'🟦',trending:true, controls: 'Arrows to Move & Rotate'},
+            {id:8,title:'Car Dodge',category:'Racing',plays:'2.5M',src:'games/cardodge.html',color:'#F43F5E',icon:'🏎️',trending:true, controls: 'Left/Right Arrows to Steer'},
+            {id:9,title:'Memory Match',category:'Puzzle',plays:'1.1M',src:'games/memory.html',color:'#8B5CF6',icon:'🧠',trending:false, controls: 'Click to Flip Cards'},
+            {id:10,title:'Fruit Slicer',category:'Action',plays:'4.1M',src:'games/fruitninja.html',color:'#EF4444',icon:'🍉',trending:true, controls: 'Click & Drag to Slice'},
+            {id:11,title:'Tower Defense',category:'Action',plays:'1.2M',src:'games/towerdefense.html',color:'#3B82F6',icon:'🏰',trending:false, controls: 'Click to Place Towers'},
+            {id:12,title:'Ping Pong Duel',category:'Sports',plays:'980K',src:'games/pingpong.html',color:'#E2E8F0',icon:'🏓',trending:false, controls: 'W/S or Arrows to Move Paddle'}
         ];
         const CATEGORIES = ['All','Action','Puzzle','Racing','Sports','Shooting','Cards','Brain','Multiplayer','Casual'];
         let currentCategory = 'All';
@@ -1399,38 +1432,135 @@
 
         function playGame(id) {
             const game = GAMES_DATA.find(g=>g.id===id); if(!game) return;
+            
+            // UI Updates
             document.getElementById('playing-title').innerText = game.title;
             document.getElementById('playing-meta').innerText = `${game.category} • ${game.plays} plays`;
+            document.getElementById('playing-controls').innerText = game.controls || 'WASD / Arrows to play';
+            
             const container = document.getElementById('game-container');
-            container.innerHTML = `<iframe src="${game.src}" allowfullscreen></iframe>`;
+            
+            // Suspend Chatbot to save resources
+            const chatIframe = document.getElementById('chat-widget').querySelector('iframe');
+            if(chatIframe) chatIframe.dataset.savedSrc = chatIframe.src;
+            if(chatIframe) chatIframe.src = 'about:blank';
+
+            // Show Loading State
+            container.innerHTML = `
+                <div id="game-loading-spinner" style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #000; z-index: 10;">
+                    <div class="spinner-ring" style="border-top-color: ${game.color}"></div>
+                    <p style="margin-top: 1rem; color: var(--text-secondary); font-weight: 600;">Optimizing for performance...</p>
+                </div>
+                <iframe id="active-game-iframe" src="${game.src}" allow="autoplay; gamepad; keyboard; fullscreen" allowfullscreen style="opacity: 0; transition: opacity 0.5s; background: #000;"></iframe>
+            `;
+
+            const iframe = document.getElementById('active-game-iframe');
+            iframe.onload = () => {
+                const spinner = document.getElementById('game-loading-spinner');
+                if(spinner) spinner.remove();
+                iframe.style.opacity = '1';
+                setTimeout(() => {
+                    iframe.focus();
+                    if(iframe.contentWindow) iframe.contentWindow.focus();
+                }, 100);
+            };
+
+            // Transition Views
             document.getElementById('main-view').style.opacity = '0';
+            document.getElementById('main-view').style.pointerEvents = 'none'; // Disable background interactions
+            
             setTimeout(()=>{
                 document.getElementById('main-view').style.display = 'none';
                 document.getElementById('game-view').style.display = 'block';
-                document.getElementById('game-view').style.opacity = '1';
-                window.scrollTo(0,0);
-            }, 500);
+                setTimeout(() => {
+                    document.getElementById('game-view').style.opacity = '1';
+                    window.scrollTo(0,0);
+                }, 50);
+            }, 300);
         }
 
         function showHome(e) {
             if(e) e.preventDefault();
-            ['game-view','action-view'].forEach(id=>{ document.getElementById(id).style.opacity='0'; });
+            
+            // Restore Chatbot
+            const chatIframe = document.getElementById('chat-widget').querySelector('iframe');
+            if(chatIframe && chatIframe.dataset.savedSrc) {
+                chatIframe.src = chatIframe.dataset.savedSrc;
+            }
+
+            ['game-view','action-view'].forEach(id=>{ 
+                const el = document.getElementById(id);
+                if(el) el.style.opacity='0'; 
+            });
             setTimeout(()=>{
-                ['game-view','action-view'].forEach(id=>document.getElementById(id).style.display='none');
-                document.getElementById('main-view').style.display = 'block';
-                document.getElementById('main-view').style.opacity = '1';
+                ['game-view','action-view'].forEach(id=>{
+                    const el = document.getElementById(id);
+                    if(el) el.style.display='none';
+                });
+                const main = document.getElementById('main-view');
+                main.style.display = 'block';
+                main.style.pointerEvents = 'auto';
+                setTimeout(() => main.style.opacity = '1', 50);
                 window.scrollTo(0,0);
                 document.getElementById('game-search').value = '';
-                currentCategory = 'All'; renderGenres(); renderGames(GAMES_DATA);
+                currentCategory = 'All'; 
+                
+                // Clear active game iframe to free memory
+                const container = document.getElementById('game-container');
+                if(container) container.innerHTML = '';
+                
+                renderGenres(); renderGames(GAMES_DATA);
                 document.getElementById('grid-title').innerText = '🕹️ All Games';
-            }, 500);
+            }, 300);
+        }
+
+        function toggleMainFullscreen() {
+            const iframe = document.querySelector('#game-container iframe');
+            if (!iframe) return;
+            if (document.fullscreenElement) {
+                document.exitFullscreen();
+            } else {
+                if (iframe.requestFullscreen) iframe.requestFullscreen();
+                else if (iframe.webkitRequestFullscreen) iframe.webkitRequestFullscreen();
+                else if (iframe.msRequestFullscreen) iframe.msRequestFullscreen();
+            }
         }
 
         // ESC to close modal
         document.addEventListener('keydown', e => { if(e.key==='Escape') closeActionModal(); });
 
+        function toggleChat() {
+            const chat = document.getElementById('chat-widget');
+            const bubble = document.getElementById('chat-bubble');
+            if (chat.style.display === 'none') {
+                chat.style.display = 'block';
+                bubble.innerHTML = '✕';
+                setTimeout(() => chat.style.opacity = '1', 10);
+            } else {
+                chat.style.opacity = '0';
+                bubble.innerHTML = '💬';
+                setTimeout(() => chat.style.display = 'none', 300);
+            }
+        }
+
         window.addEventListener('DOMContentLoaded', init);
     </script>
+
+    <!-- Chatbot Widget -->
+    <div id="chat-widget" style="position: fixed; bottom: 90px; right: 20px; width: 400px; height: 600px; max-width: calc(100vw - 40px); max-height: calc(100vh - 120px); z-index: 9999; border-radius: 20px; overflow: hidden; box-shadow: 0 15px 40px rgba(0,0,0,0.6); background: #111; display: none; opacity: 0; transition: all 0.3s ease; border: 1px solid var(--accent-purple);">
+        <iframe
+            src="https://www.chatbase.co/chatbot-iframe/nM7X8JOM6044PBmIIBWbx"
+            width="100%"
+            style="height: 100%;"
+            frameborder="0"
+            allow="microphone"
+        ></iframe>
+    </div>
+
+    <!-- Chat Bubble Icon -->
+    <button id="chat-bubble" onclick="toggleChat()" style="position: fixed; bottom: 20px; right: 20px; width: 60px; height: 60px; border-radius: 50%; background: var(--accent-purple); color: white; border: none; cursor: pointer; font-size: 1.8rem; z-index: 10000; box-shadow: 0 5px 20px rgba(124, 58, 237, 0.5); display: flex; align-items: center; justify-content: center; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
+        💬
+    </button>
 </body>
 
 </html>

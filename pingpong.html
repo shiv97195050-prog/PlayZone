@@ -100,7 +100,13 @@
             draw() {
                 ctx.fillStyle = this.color;
                 ctx.shadowBlur = 15; ctx.shadowColor = this.color;
-                ctx.beginPath(); ctx.roundRect(this.x, this.y, this.w, this.h, 5); ctx.fill();
+                ctx.beginPath();
+                if (ctx.roundRect) {
+                    ctx.roundRect(this.x, this.y, this.w, this.h, 5);
+                } else {
+                    ctx.rect(this.x, this.y, this.w, this.h);
+                }
+                ctx.fill();
                 ctx.shadowBlur = 0;
             }
         }

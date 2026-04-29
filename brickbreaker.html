@@ -68,7 +68,13 @@
             draw() {
                 ctx.fillStyle = '#06B6D4';
                 ctx.shadowBlur = 15; ctx.shadowColor = '#06B6D4';
-                ctx.beginPath(); ctx.roundRect(this.x, this.y, this.w, this.h, 10); ctx.fill();
+                ctx.beginPath();
+                if (ctx.roundRect) {
+                    ctx.roundRect(this.x, this.y, this.w, this.h, 10);
+                } else {
+                    ctx.rect(this.x, this.y, this.w, this.h);
+                }
+                ctx.fill();
                 ctx.shadowBlur = 0;
             }
         }
@@ -134,7 +140,13 @@
                     ctx.fillStyle = this.color;
                     ctx.shadowBlur = this.status === 2 ? 15 : 5; 
                     ctx.shadowColor = this.color;
-                    ctx.beginPath(); ctx.roundRect(this.x, this.y, brickW, brickH, 4); ctx.fill();
+                    ctx.beginPath();
+                    if (ctx.roundRect) {
+                        ctx.roundRect(this.x, this.y, brickW, brickH, 4);
+                    } else {
+                        ctx.rect(this.x, this.y, brickW, brickH);
+                    }
+                    ctx.fill();
                     // Detail line
                     ctx.fillStyle = 'rgba(255,255,255,0.3)';
                     ctx.fillRect(this.x+2, this.y+2, brickW-4, 3);

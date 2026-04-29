@@ -30,7 +30,18 @@
 
         .tile-container { position:absolute; inset:min(10px, 2vw); width:calc(100% - min(20px, 4vw)); height:calc(100% - min(20px, 4vw)); z-index:2; pointer-events:none; }
         
-        .tile { position:absolute; display:flex; justify-content:center; align-items:center; font-weight:bold; border-radius:10px; transition:transform 0.15s ease-in-out, top 0.15s ease-in-out, left 0.15s ease-in-out; box-shadow:0 4px 8px rgba(0,0,0,0.2); }
+        .tile { 
+            position:absolute; 
+            display:flex; 
+            justify-content:center; 
+            align-items:center; 
+            font-weight:bold; 
+            border-radius:10px; 
+            transition:transform 0.15s ease-in-out, top 0.15s ease-in-out, left 0.15s ease-in-out; 
+            box-shadow:0 4px 8px rgba(0,0,0,0.2); 
+            will-change: transform, top, left;
+            transform: translateZ(0); /* Force GPU acceleration */
+        }
         
         .tile-inner { transition: transform 0.2s ease; width:100%; height:100%; display:flex; justify-content:center; align-items:center; border-radius:10px; }
         

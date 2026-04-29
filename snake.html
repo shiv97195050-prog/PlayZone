@@ -248,15 +248,22 @@
             }
         }
 
-        function tick() {
+        let lastTime = 0;
+        function tick(timestamp) {
             if(isGameOver) return;
-            move();
-            draw();
-            gameLoop = setTimeout(tick, speed);
+            
+            const deltaTime = timestamp - lastTime;
+            if (deltaTime >= speed) {
+                lastTime = timestamp;
+                move();
+                draw();
+            }
+            gameLoop = requestAnimationFrame(tick);
         }
 
         function gameOver() {
             isGameOver = true;
+            cancelAnimationFrame(gameLoop);
             if(score > highScore) {
                 highScore = score;
                 localStorage.setItem('snakeHighScore', highScore);
